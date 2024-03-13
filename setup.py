@@ -13,14 +13,14 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     install_requires=[],
-    url="",
+    url="https://github.com/minitriga/netbox-reorder-rack/",
     project_urls={
-        "Bug Tracker": "",
+        "Bug Tracker": "https://github.com/minitriga/netbox-reorder-rack/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
+        "License :: OSI Approved :: Apache Software License",
+        "Framework :: Django",
     ],
     packages=find_packages(),
     include_package_data=True,
