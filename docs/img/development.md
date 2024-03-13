@@ -23,5 +23,3 @@ To edit javascript you must change files contained within static_dev and then ru
 ```shell
 node bundle.js
 ```
-
-## Build
