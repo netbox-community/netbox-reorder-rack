@@ -1,0 +1,34 @@
+{% load rack %}
+<div class="d-flex justify-content-center">
+    <div class="rack_front">
+      <ul class="unit_numbers">
+        {% for unit in object.units %}
+        {% if unit|rack_unit %}
+        <li>{{ unit|rack_unit_to_int }}</li>
+        {% else %}
+        <li></li>
+        {% endif %}
+        {% endfor %}
+      </ul>
+      <div class="grid-stack rack" id="grid-{{face}}" gs-column="2" gs-max-row="{{ object.u_height|mul:2 }}" gs-min-row="{{object.u_height|mul:2}}" data-grid-id="{% if front == 'front' %}0{% else %}1{% endif %}">
+        {% for device in units %}
+        {% if device.device %}
+        {% if device.device.face == face %}
+        <div class='grid-stack-item' gs-w='2' gs-h='{{ device.height|rack_unit_to_int|mul:2 }}' gs-x='0' gs-y='{{device|calculate_u_position:object}}' gs-id='{{device.device.id}}' gs-locked='false' data-item-color="{{device.device.role.color}}" data-item-text-color="{% if device.device.role.color %}{{ device.device.role.color|text_color }}{% else %}000000{% endif %}" data-full-depth="{{device.device.device_type.is_full_depth}}" data-item-face="{{ face }}">
+          <div class='grid-stack-item-content' style="background-color: #{{device.device.role.color}}; color: #{% if device.device.role.color %}{{ device.device.role.color|text_color }}{% else %}000000{% endif %};">
+            {{device.device.name}}
+          </div>
+        </div>
+        {% else %}
+        <div class='grid-stack-item' gs-w='2' gs-h='{{ device.height|rack_unit_to_int|mul:2 }}' gs-x='0' gs-y='{{device|calculate_u_position:object}}' gs-id='{{device.device.id}}' gs-locked='false' data-item-color="{{device.device.role.color}}" data-item-text-color="{% if device.device.role.color %}{{ device.device.role.color|text_color }}{% else %}000000{% endif %}" data-full-depth="{{device.device.device_type.is_full_depth}}" data-item-face="back">
+          <div class='grid-stack-item-content device_rear' style="color: #000000">
+            {{device.device.name}}
+          </div>
+        </div>
+        {% endif %}
+        {% endif %}
+        {% endfor %}
+      </div>
+      <ul class="indexes"></ul>
+    </div>
+  </div>

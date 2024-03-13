@@ -1,0 +1,2 @@
+recursive-include netbox_reorder_rack/static *
+recursive-include netbox_reorder_rack/templates *

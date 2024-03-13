@@ -1,0 +1,111 @@
+{% extends 'base/layout.html' %}
+{% load helpers %}
+{% load tabs %}
+{% load static %}
+{% load rack %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'netbox_reorder_rack/css/rack.css' %}">
+{% endblock %}
+
+
+
+{% block header %}
+<div class="d-flex justify-content-between align-items-center">
+  {# Breadcrumbs #}
+  <nav class="breadcrumb-container px-3" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      {% block breadcrumbs %}
+      <li class="breadcrumb-item"><a
+          href="{% url object|viewname:'list' %}">{{object|meta:'verbose_name_plural'|bettertitle }}</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'dcim:rack_list' %}?site_id={{ object.site.pk }}">{{ object.site }}</a></li>
+      {% if object.location %}
+        {% for location in object.location.get_ancestors %}
+          <li class="breadcrumb-item"><a href="{% url 'dcim:rack_list' %}?location_id={{ location.pk }}">{{ location }}</a></li>
+        {% endfor %}
+        <li class="breadcrumb-item"><a href="{% url 'dcim:rack_list' %}?location_id={{ object.location.pk }}">{{ object.location }}</a></li>
+      {% endif %}
+      {% endblock breadcrumbs %}
+    </ol>
+  </nav>
+  {# Object identifier #}
+  <div class="float-end px-3">
+    <code class="text-muted">
+          {% block object_identifier %}
+            {{ object|meta:"app_label" }}.{{ object|meta:"model_name" }}:{{ object.pk }}
+            {% if object.slug %}({{ object.slug }}){% endif %}
+          {% endblock object_identifier %}
+        </code>
+  </div>
+</div>
+{{ block.super }}
+{% endblock %}
+
+{% block title %}Reorder {{ object }}{% endblock %}
+
+{% block subtitle %}
+<div class="object-subtitle">
+  <span>Created {{ object.created|annotated_date }}</span>
+  <span class="separator">&middot;</span>
+  <span>Updated <span title="{{ object.last_updated }}">{{ object.last_updated|timesince }}</span> ago</span>
+</div>
+{% endblock %}
+
+{% block tabs %}
+<ul class="nav nav-tabs px-3">
+  {# Primary tab #}
+  <li class="nav-item" role="presentation">
+    <a class="nav-link{% if not tab %} active{% endif %}" href="{{ object.get_absolute_url }}">Reorder Rack</a>
+  </li>
+</ul>
+{% endblock tabs %}
+
+{% block content-wrapper %}
+<div class="tab-content">
+  {% block content %}
+  <div class="row">
+    <div class="col col-12">
+      <div class="row">
+        <div class="d-flex justify-content-end"><button class="btn btn-primary" id="saveButton" disabled>Save</button></div>
+      </div>
+      <div class="row">
+        <div class="col col-md-4 col-sm-4 col-xs-12 text-center">
+          <h4>Front</h4>
+          {% include 'netbox_reorder_rack/inc/rack_elevation.html' with units=front_units face='front' %}
+        </div>
+        <div class="col col-md-4 col-sm-4 col-xs-12 text-center">
+          <h4>Back</h4>
+          {% include 'netbox_reorder_rack/inc/rack_elevation.html' with units=rear_units face='rear'%}
+        </div>
+        <div class="col col-md-4 col-sm-4 col-xs-12 text-center">
+          <h4>Non-Racked Devices</h4>
+
+          <div class="grid-stack rack" id="grid-other" gs-column="2" gs-max-row="150" gs-min-row="{{ object.u_height|mul:2 }}" data-grid-id="2" style="width: 434px;">
+            {% for device in non_racked %}
+            <div class='grid-stack-item' gs-w='2' gs-h='{{ device.device_type.u_height|mul:2 }}' gs-x='0' gs-id='{{device.id}}' gs-locked='false' data-item-color="{{device.role.color}}" data-item-text-color="{% if device.role.color %}{{ device.role.color|text_color }}{% else %}000000{% endif %}" data-full-depth="{{device.device_type.is_full_depth}}">
+              <div class='grid-stack-item-content' style="background-color: #{{device.role.color}}; color: #{% if device.role.color %}{{ device.role.color|text_color }}{% else %}000000{% endif %};">
+                {{device.name}}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock content %}
+</div>
+{% endblock content-wrapper %}
+
+{% block javascript %}
+<script type="text/javascript">
+  const basePath = '{{ basepath }}';
+  const netbox_csrf_token = '{{ csrf_token }}'
+  const returnUrl = '{{ object.get_absolute_url }}';
+  const rackId = {{ object.id }};
+  const descUnits = {{ object.desc_units | lower }};
+</script>
+<script src="{% static 'netbox_reorder_rack/js/rack.js' %}" defer></script>
+
+{% endblock %}
