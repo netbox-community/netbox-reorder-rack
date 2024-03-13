@@ -1,4 +1,4 @@
-# Netbox Reorder Rack Plugind
+# Netbox Reorder Rack Plugin
 
 ![Version](https://img.shields.io/pypi/v/netbox-reorder-rack) ![Downloads](https://img.shields.io/pypi/dm/netbox-reorder-rack)
 
