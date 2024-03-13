@@ -6,7 +6,7 @@ Allow the ability to reorder rack units in NetBox using a drag and drop interfac
 
 ![Reorder Rack](docs/img/netbox-reorder-rack.gif)
 
-## Installation
+## Installationasdasd
 
 **_NOTE:_** For docker please see: [Docker install](https://github.com/netbox-community/netbox-docker/wiki/Using-Netbox-Plugins)
 
