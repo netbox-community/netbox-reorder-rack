@@ -1,21 +1,21 @@
 :root {
-    --nbx-rack-bg: #e9ecef;
+    --nbx-rack-bg: var(--tblr-bg-surface-secondary);
     --nbx-rack-border: #000;
     --nbx-rack-slot-bg: #e9ecef;
     --nbx-rack-slot-border: #adb5bd;
     --nbx-rack-slot-hover-bg: #ced4da;
     --nbx-rack-link-color: #0d6efd;
-    --nbx-rack-unit-color: #6c757d
+    --nbx-rack-unit-color: #6c757d;
 }
 
-:root[data-netbox-color-mode=dark] {
-    --nbx-rack-bg: #343a40;
+:root[data-bs-theme=dark] {
+    --nbx-rack-bg: rgb(27, 41, 58);
     --nbx-rack-border: #6c757d;
     --nbx-rack-slot-bg: #343a40;
     --nbx-rack-slot-border: #495057;
     --nbx-rack-slot-hover-bg: #212529;
     --nbx-rack-link-color: #9ec5fe;
-    --nbx-rack-unit-color: #6c757d
+    --nbx-rack-unit-color: #adb5bd;
 }
 
 .device_rear {
