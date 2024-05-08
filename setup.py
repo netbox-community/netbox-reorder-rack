@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="netbox_reorder_rack",
-    version="1.0.0",
+    version="1.1.0",
     author="Alex Gittings",
     author_email="agitting96@gmail.com",
     description="NetBox plugin to reorder rack layouts.",

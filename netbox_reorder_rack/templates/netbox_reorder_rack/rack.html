@@ -45,7 +45,7 @@
 
 {% block subtitle %}
 <div class="object-subtitle">
-  <span>Created {{ object.created|annotated_date }}</span>
+  <span>Created {{ object.created|isodatetime }}</span>
   <span class="separator">&middot;</span>
   <span>Updated <span title="{{ object.last_updated }}">{{ object.last_updated|timesince }}</span> ago</span>
 </div>

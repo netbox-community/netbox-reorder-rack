@@ -1,11 +1,11 @@
-from extras.plugins import PluginConfig
+from netbox.plugins import PluginConfig
 
 
 class NetboxReorderRackConfig(PluginConfig):
     name = "netbox_reorder_rack"
     verbose_name = "NetBox Reorder Rack"
     description = "NetBox plugin to reorder rack layouts."
-    version = "1.0.0"
+    version = "1.1.0"
     base_url = "reorder"
 
 

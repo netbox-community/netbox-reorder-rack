@@ -1,5 +1,6 @@
+from dcim.svg.racks import get_device_name
 from django import template
-from utilities.utils import foreground_color
+from utilities.html import foreground_color
 
 register = template.Library()
 
@@ -40,3 +41,8 @@ def mul(value, mul_value):
 @register.filter()
 def text_color(value):
     return foreground_color(value)
+
+
+@register.filter()
+def device_name(device):
+    return get_device_name(device)
