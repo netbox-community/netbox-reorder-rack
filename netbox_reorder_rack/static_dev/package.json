@@ -8,8 +8,8 @@
     "bundle:scripts": "node bundle.js --scripts"
   },
   "dependencies": {
-    "bootstrap": "~5.0.2",
-    "gridstack": "^7.2.3"
+    "bootstrap": "5.3.3",
+    "gridstack": "10.1.2"
   },
   "devDependencies": {
     "esbuild": "^0.20.1",
