@@ -6,6 +6,8 @@ Allow the ability to reorder rack units in NetBox using a drag and drop interfac
 
 ![Reorder Rack](docs/img/netbox-reorder-rack.gif)
 
+> If there are any issues feel free to create an [Issue](https://github.com/minitriga/netbox-reorder-rack/issues) or feel free to contact me directly on Slack in the [NetDev](https://netdev.chat/) community.
+
 ## Installation
 
 **_NOTE:_** For docker please see: [Docker install](https://github.com/netbox-community/netbox-docker/wiki/Using-Netbox-Plugins)
@@ -45,7 +47,15 @@ systemctl restart netbox
 | netbox version | plugin version |
 | -------------- | ----------------------------- |
 | >= 4.0.0       | >= v1.1.0                     |
-| <= 4.0.0       | = v1.0.0                     |
+| <= 4.0.0       | = v1.0.0                      |
+
+## Dependencies
+Python:
+  - None
+
+Javascript:
+  - Gridstack (Currently running same versions as Netbox)
+  - Bootsrap (Currently running same versions as Netbox)
 
 ### Update
 
