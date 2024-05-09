@@ -1,10 +1,10 @@
+from core.models import ObjectType
 from dcim.models import Device
 from dcim.models import DeviceRole
 from dcim.models import DeviceType
 from dcim.models import Manufacturer
 from dcim.models import Rack
 from dcim.models import Site
-from django.contrib.contenttypes.models import ContentType
 from users.models import ObjectPermission
 from utilities.testing import TestCase
 
@@ -144,8 +144,7 @@ class ReorderRackAPITest(TestCase):
         obj_perm = ObjectPermission(name="Test permission", actions=["view", "change"])
         obj_perm.save()
         obj_perm.users.add(self.user)
-        ct = ContentType.objects.filter(model="device").first()
-        obj_perm.object_types.add(ct)
+        obj_perm.object_types.add(ObjectType.objects.get_for_model(Device))
 
         rack = Rack.objects.get(name="Test Rack 1")
         device1 = Device.objects.get(name="Device 1")
