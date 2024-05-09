@@ -50,10 +50,10 @@ systemctl restart netbox
 | <= 4.0.0       | = v1.0.0                      |
 
 ## Dependencies
-Python: 
+Python:
   - None
 
-Javascript: 
+Javascript:
   - Gridstack (Currently running same versions as Netbox)
   - Bootsrap (Currently running same versions as Netbox)
 
