@@ -1,6 +1,6 @@
 
 {% if perms.dcim.change_device %}
-<a href="{% url 'dcim:rack_reorder' pk=object.pk %}" class="btn btn-sm btn-success" role="button">
+<a href="{% url 'dcim:rack_reorder' pk=object.pk %}" class="btn btn-info" role="button">
     <i class="mdi mdi-sort" aria-hidden="true"></i> Reorder
   </a>
 {% endif %}
