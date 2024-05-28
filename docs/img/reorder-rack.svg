@@ -1,0 +1,15 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    viewBox="0 0 100 100" width="100" height="100">
+  <style>
+    .rack { fill: none; stroke: #000; stroke-width: 2; }
+    .device { fill: #4682B4; }
+    .arrow { fill: #32CD32; }
+  </style>
+  <rect x="15" y="10" width="70" height="80" class="rack"/>
+  <rect x="25" y="20" width="50" height="10" class="device"/>
+  <rect x="25" y="35" width="50" height="10" class="device"/>
+  <rect x="25" y="50" width="50" height="10" class="device"/>
+  <rect x="25" y="65" width="50" height="10" class="device"/>
+  <path d="M50,5 L45,15 L55,15 Z" class="arrow"/>
+  <path d="M50,95 L45,85 L55,85 Z" class="arrow"/>
+</svg>
