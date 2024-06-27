@@ -29,25 +29,36 @@ class SaveViewSet(PermissionRequiredMixin, viewsets.ViewSet):
         try:
             serializer = ReorderRackSerializer(request.data)
             with transaction.atomic():
-                for device in rack.devices.all():
-                    device.position = None
-                    device.clean()
-                    device.save()
+                #for device in rack.devices.all():
+                #    device.position = None
+                #    device.clean()
+                #    device.save()
 
                 for new in request.data["front"]:
                     device = rack.devices.filter(pk=new["id"]).first()
-                    device.position = decimal.Decimal(new["y"])
-                    device.face = new["face"]
-                    device.clean()
-                    device.save()
+                    current_device = get_object_or_404(Device, pk=new["id"])
+
+                    if current_device.face != new["face"] or device.position != decimal.Decimal(new["y"]):
+                        device.position = decimal.Decimal(new["y"])
+                        device.face = new["face"]
+                        device.clean()
+                        device.save()
 
                 for new in request.data["rear"]:
                     device = rack.devices.filter(pk=new["id"]).first()
-                    device.position = decimal.Decimal(new["y"])
-                    device.face = new["face"]
+                    current_device = get_object_or_404(Device, pk=new["id"])
+                    if current_device.face != new["face"] or device.position != decimal.Decimal(new["y"]):
+                        device.position = decimal.Decimal(new["y"])
+                        device.face = new["face"]
+                        device.clean()
+                        device.save()
+                # other = unracked
+                for new in request.data["other"]:
+                    device = rack.devices.filter(pk=new["id"]).first()
+                    device.position = None
                     device.clean()
                     device.save()
-
+                    
                 return Response(
                     {"message": "POST request received", "data": serializer.data},
                     status=status.HTTP_201_CREATED,

@@ -1,5 +1,4 @@
-from dcim.models import Device
-from dcim.models import Rack
+from dcim.models import Device, Rack, DeviceType
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin
@@ -23,6 +22,16 @@ class ReorderView(LoginRequiredMixin, PermissionRequiredMixin, View):
         non_racked = Device.objects.filter(
             rack=rack, position__isnull=True, parent_bay__isnull=True
         )
+
+        exclude_list = []
+        # fix - exclude all child devices:
+        for device in non_racked:
+            device_type = DeviceType.objects.get(id=device.device_type.id)
+            if device_type.subdevice_role == "child":
+                exclude_list.append(device.id)
+        
+        non_racked_devices = non_racked.exclude(pk__in = exclude_list)
+
         return render(
             request,
             self.template_name,
@@ -30,7 +39,7 @@ class ReorderView(LoginRequiredMixin, PermissionRequiredMixin, View):
                 "object": rack,
                 "front_units": rack.get_rack_units(expand_devices=False, face="front"),
                 "rear_units": rack.get_rack_units(expand_devices=False, face="rear"),
-                "non_racked": non_racked,
+                "non_racked": non_racked_devices,
                 "basepath": settings.BASE_PATH,
             },
         )

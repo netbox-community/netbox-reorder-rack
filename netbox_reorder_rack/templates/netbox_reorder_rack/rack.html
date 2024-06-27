@@ -84,7 +84,11 @@
             {% for device in non_racked %}
             <div class='grid-stack-item' gs-w='2' gs-h='{{ device.device_type.u_height|mul:2 }}' gs-x='0' gs-id='{{device.id}}' gs-locked='false' data-item-color="{{device.role.color}}" data-item-text-color="{% if device.role.color %}{{ device.role.color|text_color }}{% else %}000000{% endif %}" data-full-depth="{{device.device_type.is_full_depth}}">
               <div class='grid-stack-item-content' style="background-color: #{{device.role.color}}; color: #{% if device.role.color %}{{ device.role.color|text_color }}{% else %}000000{% endif %};">
-                {{device.name}}
+                {% if not device.name %}
+                  {{ device.device_type }}
+                {% else %}
+                  {{device.name}}
+                {% endif %}
               </div>
             </div>
             {% endfor %}
