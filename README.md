@@ -57,7 +57,7 @@ Python:
 
 Javascript:
   - Gridstack (Currently running same versions as Netbox)
-  - Bootsrap (Currently running same versions as Netbox)
+  - Bootstrap (Currently running same versions as Netbox)
 
 ### Update
 
