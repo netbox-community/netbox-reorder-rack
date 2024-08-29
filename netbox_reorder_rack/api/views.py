@@ -29,11 +29,6 @@ class SaveViewSet(PermissionRequiredMixin, viewsets.ViewSet):
         try:
             serializer = ReorderRackSerializer(request.data)
             with transaction.atomic():
-                #for device in rack.devices.all():
-                #    device.position = None
-                #    device.clean()
-                #    device.save()
-
                 for new in request.data["front"]:
                     device = rack.devices.filter(pk=new["id"]).first()
                     current_device = get_object_or_404(Device, pk=new["id"])

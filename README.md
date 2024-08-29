@@ -48,7 +48,7 @@ systemctl restart netbox
 
 | netbox version | plugin version |
 | -------------- | ----------------------------- |
-| >= 4.0.0       | >= v1.1.0                     |
+| >= 4.0.0 < 4.1.0 | >= v1.1.2                     |
 | <= 4.0.0       | = v1.0.0                      |
 
 ## Dependencies
