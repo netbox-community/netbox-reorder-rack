@@ -4,6 +4,7 @@
 {% load static %}
 {% load rack %}
 {% load i18n %}
+{% load perms %}
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'netbox_reorder_rack/css/rack.css' %}">
@@ -88,7 +89,7 @@
         <div class="col col-md-4 col-sm-4 col-xs-12 text-center">
           <h4>Non-Racked Devices</h4>
 
-          <div class="grid-stack rack" id="grid-other" gs-column="2" gs-max-row="150" gs-min-row="{{ object.u_height|mul:2 }}" data-grid-id="2" style="width: 434px;">
+          <div class="grid-stack rack" id="grid-other" gs-column="2" gs-max-row="150" gs-min-row="{{ object.u_height|mul:2 }}" data-grid-id="2" style="width: 434px;" gs-locked='{% if not request.user|can_change:device.device %}true{% else %}{% endif %}' gs-no-move='{% if not request.user|can_change:device.device %}true{% else %}{% endif %}'>
             {% for device in non_racked %}
             <div class='grid-stack-item' gs-w='2' gs-h='{{ device.device_type.u_height|mul:2 }}' gs-x='0' gs-id='{{device.id}}' gs-locked='false' data-item-color="{{device.role.color}}" data-item-text-color="{% if device.role.color %}{{ device.role.color|text_color }}{% else %}000000{% endif %}" data-full-depth="{{device.device_type.is_full_depth}}">
               <div class='grid-stack-item-content' style="background-color: #{{device.role.color}}; color: #{% if device.role.color %}{{ device.role.color|text_color }}{% else %}000000{% endif %};">
@@ -119,18 +120,5 @@
   const descUnits = {{ object.desc_units | lower }};
 </script>
 <script src="{% static 'netbox_reorder_rack/js/rack.js' %}" defer></script>
-<script type="text/javascript">
-    document.getElementById('view-selector').addEventListener('change', function() {
-      // Get the selected option value
-      var selectedValue = this.value;
-
-      // Construct the new URL with the selected option as a query parameter
-      var currentUrl = window.location.href.split('?')[0];  // Get the base URL (without parameters)
-      var newUrl = currentUrl + '?view=' + selectedValue;
-
-      // Redirect to the new URL
-      window.location.href = newUrl;
-  });
-</script>
 
 {% endblock %}

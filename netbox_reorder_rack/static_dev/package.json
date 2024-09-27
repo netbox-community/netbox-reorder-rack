@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "netbox_topology_views",
+  "name": "netbox_reorder_rack",
   "version": "1.0.0",
   "scripts": {
     "bundle": "node bundle.js",
@@ -8,7 +8,7 @@
     "bundle:scripts": "node bundle.js --scripts"
   },
   "dependencies": {
-    "bootstrap": "5.3.3",
+    "bootstrap": "^5.3.3",
     "gridstack": "10.1.2"
   },
   "devDependencies": {
