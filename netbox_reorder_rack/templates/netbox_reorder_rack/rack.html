@@ -3,6 +3,7 @@
 {% load tabs %}
 {% load static %}
 {% load rack %}
+{% load i18n %}
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'netbox_reorder_rack/css/rack.css' %}">
@@ -66,7 +67,14 @@
   <div class="row">
     <div class="col col-12">
       <div class="row">
-        <div class="d-flex justify-content-end"><button class="btn btn-success" id="saveButton" disabled>Save</button></div>
+        <div class="d-flex justify-content-end btn-list mb-2">
+          <select class="btn btn-outline-secondary no-ts rack-view" id="view-selector">
+            <option value="images-and-labels" selected="selected">{% trans "Images and Labels" %}</option>
+            <option value="images-only">{% trans "Images only" %}</option>
+            <option value="labels-only">{% trans "Labels only" %}</option>
+          </select>
+          <button class="btn btn-success" id="saveButton" disabled>Save</button>
+        </div>
       </div>
       <div class="row">
         <div class="col col-md-4 col-sm-4 col-xs-12 text-center">
@@ -111,5 +119,18 @@
   const descUnits = {{ object.desc_units | lower }};
 </script>
 <script src="{% static 'netbox_reorder_rack/js/rack.js' %}" defer></script>
+<script type="text/javascript">
+    document.getElementById('view-selector').addEventListener('change', function() {
+      // Get the selected option value
+      var selectedValue = this.value;
+
+      // Construct the new URL with the selected option as a query parameter
+      var currentUrl = window.location.href.split('?')[0];  // Get the base URL (without parameters)
+      var newUrl = currentUrl + '?view=' + selectedValue;
+
+      // Redirect to the new URL
+      window.location.href = newUrl;
+  });
+</script>
 
 {% endblock %}
