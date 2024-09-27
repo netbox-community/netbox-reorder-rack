@@ -33,7 +33,9 @@ class SaveViewSet(PermissionRequiredMixin, viewsets.ViewSet):
                     device = rack.devices.filter(pk=new["id"]).first()
                     current_device = get_object_or_404(Device, pk=new["id"])
 
-                    if current_device.face != new["face"] or device.position != decimal.Decimal(new["y"]):
+                    if current_device.face != new[
+                        "face"
+                    ] or device.position != decimal.Decimal(new["y"]):
                         device.position = decimal.Decimal(new["y"])
                         device.face = new["face"]
                         device.clean()
@@ -42,7 +44,9 @@ class SaveViewSet(PermissionRequiredMixin, viewsets.ViewSet):
                 for new in request.data["rear"]:
                     device = rack.devices.filter(pk=new["id"]).first()
                     current_device = get_object_or_404(Device, pk=new["id"])
-                    if current_device.face != new["face"] or device.position != decimal.Decimal(new["y"]):
+                    if current_device.face != new[
+                        "face"
+                    ] or device.position != decimal.Decimal(new["y"]):
                         device.position = decimal.Decimal(new["y"])
                         device.face = new["face"]
                         device.clean()
@@ -53,7 +57,7 @@ class SaveViewSet(PermissionRequiredMixin, viewsets.ViewSet):
                     device.position = None
                     device.clean()
                     device.save()
-                    
+
                 return Response(
                     {"message": "POST request received", "data": serializer.data},
                     status=status.HTTP_201_CREATED,
