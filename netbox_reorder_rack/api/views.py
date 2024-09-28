@@ -107,22 +107,30 @@ class SaveViewSet(PermissionRequiredMixin, viewsets.ViewSet):
                 Device.objects.restrict(request.user), pk=device_data["id"]
             )
 
+            if is_other:
+                if device.position != device_data["y"]:
+                    device.position = None
+                    device.face = ""
+                    self._check_permission(request, device, permission)
+
+                    # Save the device and mark changes as made
+                    device.clean()
+                    device.save()
+                    changes_made = True
             # Update position and face for 'front' and 'rear' devices if changed
-            if current_device.face != device_data[
-                "face"
-            ] or device.position != decimal.Decimal(device_data["y"]):
-                if is_other:
-                    device.position = None  # For 'other' devices
-                else:
+            elif not is_other:
+                if current_device.face != device_data[
+                    "face"
+                ] or device.position != decimal.Decimal(device_data["y"]):
                     device.position = decimal.Decimal(device_data["y"])
                     device.face = device_data["face"]
 
-                self._check_permission(request, device, permission)
+                    self._check_permission(request, device, permission)
 
-                # Save the device and mark changes as made
-                device.clean()
-                device.save()
-                changes_made = True
+                    # Save the device and mark changes as made
+                    device.clean()
+                    device.save()
+                    changes_made = True
 
         return changes_made  # Return whether changes were made
 

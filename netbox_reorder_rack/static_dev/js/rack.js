@@ -166,6 +166,10 @@ function saveRack(rack_id, desc_units) {
           u_position = u_height > 1 ? rack_height - y - u_height + 1 : rack_height - y;
         }
 
+        if (item.getAttribute('data-item-face') == "none") {
+          u_position = null;
+        }
+
         // Push the item data to the 'gridData' array
         gridData.push({
           'id': parseInt(item.getAttribute('gs-id')),
