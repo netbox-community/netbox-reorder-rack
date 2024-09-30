@@ -1,7 +1,7 @@
 {% load rack %}
 {% load perms %}
 <div class="d-flex justify-content-center">
-    <div class="rack_front">
+    <div class="rack_front d-flex">
       <ul class="unit_numbers">
         {% for unit in object.units %}
         {% if unit|rack_unit %}

@@ -65,8 +65,6 @@
 {% block content-wrapper %}
 <div class="tab-content">
   {% block content %}
-  <div class="row">
-    <div class="col col-12">
       <div class="row">
         <div class="d-flex justify-content-end btn-list mb-2">
           <select class="btn btn-outline-secondary no-ts rack-view" id="view-selector">
@@ -77,19 +75,20 @@
           <button class="btn btn-success" id="saveButton" disabled>Save</button>
         </div>
       </div>
+      <div class="container mt-2">
       <div class="row">
-        <div class="col col-md-4 col-sm-4 col-xs-12 text-center">
+        <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 text-center">
           <h4>Front</h4>
           {% include 'netbox_reorder_rack/inc/rack_elevation.html' with units=front_units face='front' %}
         </div>
-        <div class="col col-md-4 col-sm-4 col-xs-12 text-center">
+        <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 text-center">
           <h4>Back</h4>
           {% include 'netbox_reorder_rack/inc/rack_elevation.html' with units=rear_units face='rear'%}
         </div>
-        <div class="col col-md-4 col-sm-4 col-xs-12 text-center">
+        <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 text-center">
           <h4>Non-Racked Devices</h4>
-
-          <div class="grid-stack rack" id="grid-other" gs-column="2" gs-max-row="150" gs-min-row="{{ object.u_height|mul:2 }}" data-grid-id="2" style="width: 434px;">
+          <div class="d-flex justify-content-center">
+          <div class="grid-stack rack" id="grid-other" gs-column="2" gs-max-row="150" gs-min-row="{{ object.u_height|mul:2 }}" data-grid-id="2">
             {% for device in non_racked %}
             <div class='grid-stack-item' gs-w='2' gs-h='{{ device.device_type.u_height|mul:2 }}' gs-x='0' gs-id='{{device.id}}' gs-locked='false' data-item-face="none" data-item-color="{{device.role.color}}" data-item-text-color="{% if device.role.color %}{{ device.role.color|text_color }}{% else %}000000{% endif %}" data-full-depth="{{device.device_type.is_full_depth}}" gs-locked="{% if not request.user|can_change:device %}true{% else %}{% endif %}" gs-no-move="{% if not request.user|can_change:device %}true{% else %}{% endif %}">
               <div class='grid-stack-item-content' style="{% if device.device_type.front_image and images %}background-image: url('{{ base_url }}{{ device.device_type.front_image.url }}'); background-size: {{unit_width}}px;{% else %}background-color: #{{device.role.color}};{% endif %} color: #{% if device.role.color %}{{ device.role.color|text_color }}{% else %}000000{% endif %};">
@@ -102,11 +101,11 @@
             </div>
             {% endfor %}
           </div>
+          </div>
 
         </div>
       </div>
     </div>
-  </div>
   {% endblock content %}
 </div>
 {% endblock content-wrapper %}
