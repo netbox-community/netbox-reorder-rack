@@ -48,7 +48,7 @@ systemctl restart netbox
 
 | netbox version | plugin version |
 | -------------- | ----------------------------- |
-| >= 4.0.0       | >= v1.1.0                     |
+| >= 4.0.0 < 4.1.0 | >= v1.1.2                     |
 | <= 4.0.0       | = v1.0.0                      |
 
 ## Dependencies
@@ -57,7 +57,7 @@ Python:
 
 Javascript:
   - Gridstack (Currently running same versions as Netbox)
-  - Bootsrap (Currently running same versions as Netbox)
+  - Bootstrap (Currently running same versions as Netbox)
 
 ### Update
 

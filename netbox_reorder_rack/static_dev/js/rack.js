@@ -1,9 +1,92 @@
 // Variable to track whether changes have been made
 import { GridStack } from 'gridstack';
+import { Toast } from 'bootstrap';
 
 var changesMade = false;
 var gridItemsMap = [];
 var grids = [];
+
+function createToast(level, title, message, extra) {
+  // Set the icon based on the toast level
+  let iconName = 'mdi-alert';  // default icon
+  switch (level) {
+    case 'warning':
+      iconName = 'mdi-alert';
+      break;
+    case 'success':
+      iconName = 'mdi-check-circle';
+      break;
+    case 'info':
+      iconName = 'mdi-information';
+      break;
+    case 'danger':
+      iconName = 'mdi-alert';
+      break;
+  }
+
+  // Create the container for the toast
+  const container = document.createElement('div');
+  container.setAttribute('class', 'toast-container position-fixed bottom-0 end-0 m-3');
+
+  // Create the main toast element
+  const main = document.createElement('div');
+  main.setAttribute('class', `toast`);
+  main.setAttribute('role', 'alert');
+  main.setAttribute('aria-live', 'assertive');
+  main.setAttribute('aria-atomic', 'true');
+
+  // Create the toast header
+  const header = document.createElement('div');
+  header.setAttribute('class', `toast-header bg-${level} text-dark`);
+
+  // Add the icon to the header
+  const icon = document.createElement('i');
+  icon.setAttribute('class', `mdi ${iconName}`);
+
+  // Add the title to the header
+  const titleElement = document.createElement('strong');
+  titleElement.setAttribute('class', 'me-auto ms-1');
+  titleElement.innerText = title;
+
+  // Add the close button to the header
+  const button = document.createElement('button');
+  button.setAttribute('type', 'button');
+  button.setAttribute('class', 'btn-close');
+  button.setAttribute('data-bs-dismiss', 'toast');
+  button.setAttribute('aria-label', 'Close');
+
+  // Create the toast body
+  const body = document.createElement('div');
+  body.setAttribute('class', 'toast-body text-dark');
+  body.innerText = message.trim();
+
+  // Assemble the header
+  header.appendChild(icon);
+  header.appendChild(titleElement);
+
+  // If extra info is provided, add it to the header
+  if (typeof extra !== 'undefined') {
+    const extraElement = document.createElement('small');
+    extraElement.setAttribute('class', 'text-dark');
+    extraElement.innerText = extra;
+    header.appendChild(extraElement);
+  }
+
+  // Add the close button to the header
+  header.appendChild(button);
+
+  // Assemble the main toast
+  main.appendChild(header);
+  main.appendChild(body);
+  container.appendChild(main);
+
+  // Add the toast container to the body
+  document.body.appendChild(container);
+
+  // Initialize the Bootstrap toast
+  const toast = new Toast(main);
+  return toast;
+}
 
 // Function to get the items from the grids
 function getItems(grids) {
@@ -52,7 +135,6 @@ function initializeGrid(element, acceptWidgets) {
 
 function saveRack(rack_id, desc_units) {
   getItems(grids);
-  console.log(desc_units);
   var data = {};
 
   // Get the items from the grids
@@ -71,7 +153,7 @@ function saveRack(rack_id, desc_units) {
         let y = parseInt(item.getAttribute('gs-y')) / 2;
 
         // Get the 'height' attribute of the item and divide by 2
-        let u_height = parseInt(item.getAttribute('gs-h')) / 2 ;
+        let u_height = parseInt(item.getAttribute('gs-h')) / 2;
 
         // Get the 'max-row' attribute of the grid and divide by 2
         let rack_height = item.gridstackNode.grid.el.getAttribute('gs-max-row') / 2;
@@ -82,6 +164,10 @@ function saveRack(rack_id, desc_units) {
           u_position = y + 1;
         } else {
           u_position = u_height > 1 ? rack_height - y - u_height + 1 : rack_height - y;
+        }
+
+        if (item.getAttribute('data-item-face') == "none") {
+          u_position = null;
         }
 
         // Push the item data to the 'gridData' array
@@ -107,32 +193,50 @@ function saveRack(rack_id, desc_units) {
 
   try {
     const res = fetch('/' + basePath + 'api/plugins/reorder/save/' + rack_id + '/', {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': netbox_csrf_token,
-        },
-        body: JSON.stringify(data),
-    })
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': netbox_csrf_token,
+      },
+      body: JSON.stringify(data),
+    });
 
     res.then(response => {
-        if (response.ok) {
-            changesMade = false;
-            var button = document.getElementById('saveButton');
-            button.setAttribute('disabled', 'disabled');
+      if (response.ok) {
+        // Reset changesMade flag and disable save button
+        changesMade = false;
+        var button = document.getElementById('saveButton');
+        button.setAttribute('disabled', 'disabled');
 
-            // Get JSON data from response
-            response.json().then(jsonData => {
-                console.log(jsonData);
-                // Do something with the jsonData
-            });
+        // Get JSON data from response
+        response.json().then(jsonData => {
+          console.log(jsonData);
+        });
 
-            window.location.href = returnUrl;
-        }
+        // Redirect to the return URL after successful save
+        window.location.href = returnUrl;
+
+      } else if (response.status === 304) {
+        // Handle the 304 Not Modified status
+        console.warn('No changes detected.');
+        const toast = createToast('warning', 'Info', 'No changes were detected.', 'The data has not been modified.');
+        toast.show();
+
+      } else {
+        // Handle other errors
+        response.json().then(errorData => {
+          console.error('Error:', errorData);
+
+          // Create and show an error toast notification
+          const toast = createToast('danger', 'Error', errorData.error, errorData.message);
+          toast.show();
+        });
+      }
     });
   } catch (error) {
-      console.error('Error:', error);
+    console.error('Error:', error);
   }
+
 }
 
 let frontGrid = initializeGrid("#grid-front", acceptWidgets);
@@ -219,7 +323,7 @@ grids.forEach(function (grid, gridIndex) {
       // Get the items from the grids
       getItems(grids);
 
-    // If the widget was dropped non-racked grid from the front or rear grid
+      // If the widget was dropped non-racked grid from the front or rear grid
     } else if ((originGrid === 0 || originGrid === 1) && gridIndex === 2) {
       // If the widget is full depth, remove the widget from the other grid
       if (newWidget.el.getAttribute('data-full-depth') === "True") {
@@ -270,4 +374,16 @@ window.addEventListener('beforeunload', function (event) {
     // Display confirmation message
     event.returnValue = 'Are you sure you want to leave? Changes you made may not be saved.';
   }
+});
+
+document.getElementById('view-selector').addEventListener('change', function () {
+  // Get the selected option value
+  var selectedValue = this.value;
+
+  // Construct the new URL with the selected option as a query parameter
+  var currentUrl = window.location.href.split('?')[0];  // Get the base URL (without parameters)
+  var newUrl = currentUrl + '?view=' + selectedValue;
+
+  // Redirect to the new URL
+  window.location.href = newUrl;
 });

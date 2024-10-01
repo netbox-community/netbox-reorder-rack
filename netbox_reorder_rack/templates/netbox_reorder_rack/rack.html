@@ -1,111 +1,143 @@
-{% extends 'base/layout.html' %}
+{% extends "base/layout.html" %}
 {% load helpers %}
 {% load tabs %}
 {% load static %}
 {% load rack %}
-
+{% load i18n %}
+{% load perms %}
 {% block head %}
-<link rel="stylesheet" href="{% static 'netbox_reorder_rack/css/rack.css' %}">
-{% endblock %}
-
-
-
+    <link rel="stylesheet"
+          href="{% static 'netbox_reorder_rack/css/rack.css' %}">
+{% endblock head %}
 {% block header %}
-<div class="d-flex justify-content-between align-items-center">
-  {# Breadcrumbs #}
-  <nav class="breadcrumb-container px-3" aria-label="breadcrumb">
-    <ol class="breadcrumb">
-      {% block breadcrumbs %}
-      <li class="breadcrumb-item"><a
-          href="{% url object|viewname:'list' %}">{{object|meta:'verbose_name_plural'|bettertitle }}</a></li>
-      <li class="breadcrumb-item"><a href="{% url 'dcim:rack_list' %}?site_id={{ object.site.pk }}">{{ object.site }}</a></li>
-      {% if object.location %}
-        {% for location in object.location.get_ancestors %}
-          <li class="breadcrumb-item"><a href="{% url 'dcim:rack_list' %}?location_id={{ location.pk }}">{{ location }}</a></li>
-        {% endfor %}
-        <li class="breadcrumb-item"><a href="{% url 'dcim:rack_list' %}?location_id={{ object.location.pk }}">{{ object.location }}</a></li>
-      {% endif %}
-      {% endblock breadcrumbs %}
-    </ol>
-  </nav>
-  {# Object identifier #}
-  <div class="float-end px-3">
-    <code class="text-muted">
-          {% block object_identifier %}
-            {{ object|meta:"app_label" }}.{{ object|meta:"model_name" }}:{{ object.pk }}
-            {% if object.slug %}({{ object.slug }}){% endif %}
-          {% endblock object_identifier %}
-        </code>
-  </div>
-</div>
-{{ block.super }}
-{% endblock %}
-
-{% block title %}Reorder {{ object }}{% endblock %}
-
-{% block subtitle %}
-<div class="object-subtitle">
-  <span>Created {{ object.created|isodatetime }}</span>
-  <span class="separator">&middot;</span>
-  <span>Updated <span title="{{ object.last_updated }}">{{ object.last_updated|timesince }}</span> ago</span>
-</div>
-{% endblock %}
-
-{% block tabs %}
-<ul class="nav nav-tabs px-3">
-  {# Primary tab #}
-  <li class="nav-item" role="presentation">
-    <a class="nav-link{% if not tab %} active{% endif %}" href="{{ object.get_absolute_url }}">Reorder Rack</a>
-  </li>
-</ul>
-{% endblock tabs %}
-
-{% block content-wrapper %}
-<div class="tab-content">
-  {% block content %}
-  <div class="row">
-    <div class="col col-12">
-      <div class="row">
-        <div class="d-flex justify-content-end"><button class="btn btn-success" id="saveButton" disabled>Save</button></div>
-      </div>
-      <div class="row">
-        <div class="col col-md-4 col-sm-4 col-xs-12 text-center">
-          <h4>Front</h4>
-          {% include 'netbox_reorder_rack/inc/rack_elevation.html' with units=front_units face='front' %}
+    <div class="d-flex justify-content-between align-items-center">
+        {# Breadcrumbs #}
+        <nav class="breadcrumb-container px-3" aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                {% block breadcrumbs %}
+                    <li class="breadcrumb-item">
+                        <a href="{% url object|viewname:'list' %}">{{ object|meta:'verbose_name_plural'|bettertitle }}</a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dcim:rack_list' %}?site_id={{ object.site.pk }}">{{ object.site }}</a>
+                    </li>
+                    {% if object.location %}
+                        {% for location in object.location.get_ancestors %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'dcim:rack_list' %}?location_id={{ location.pk }}">{{ location }}</a>
+                            </li>
+                        {% endfor %}
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'dcim:rack_list' %}?location_id={{ object.location.pk }}">{{ object.location }}</a>
+                        </li>
+                    {% endif %}
+                {% endblock breadcrumbs %}
+            </ol>
+        </nav>
+        {# Object identifier #}
+        <div class="float-end px-3">
+            <code class="text-muted">
+                {% block object_identifier %}
+                    {{ object|meta:"app_label" }}.{{ object|meta:"model_name" }}:{{ object.pk }}
+                    {% if object.slug %}({{ object.slug }}){% endif %}
+                {% endblock object_identifier %}
+            </code>
         </div>
-        <div class="col col-md-4 col-sm-4 col-xs-12 text-center">
-          <h4>Back</h4>
-          {% include 'netbox_reorder_rack/inc/rack_elevation.html' with units=rear_units face='rear'%}
-        </div>
-        <div class="col col-md-4 col-sm-4 col-xs-12 text-center">
-          <h4>Non-Racked Devices</h4>
-
-          <div class="grid-stack rack" id="grid-other" gs-column="2" gs-max-row="150" gs-min-row="{{ object.u_height|mul:2 }}" data-grid-id="2" style="width: 434px;">
-            {% for device in non_racked %}
-            <div class='grid-stack-item' gs-w='2' gs-h='{{ device.device_type.u_height|mul:2 }}' gs-x='0' gs-id='{{device.id}}' gs-locked='false' data-item-color="{{device.role.color}}" data-item-text-color="{% if device.role.color %}{{ device.role.color|text_color }}{% else %}000000{% endif %}" data-full-depth="{{device.device_type.is_full_depth}}">
-              <div class='grid-stack-item-content' style="background-color: #{{device.role.color}}; color: #{% if device.role.color %}{{ device.role.color|text_color }}{% else %}000000{% endif %};">
-                {{device.name}}
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-
-        </div>
-      </div>
     </div>
-  </div>
-  {% endblock content %}
-</div>
+    {{ block.super }}
+{% endblock header %}
+{% block title %}
+    Reorder {{ object }}
+{% endblock title %}
+{% block subtitle %}
+    <div class="object-subtitle">
+        <span>Created {{ object.created|isodatetime }}</span>
+        <span class="separator">&middot;</span>
+        <span>Updated <span title="{{ object.last_updated }}">{{ object.last_updated|timesince }}</span> ago</span>
+    </div>
+{% endblock subtitle %}
+{% block tabs %}
+    <ul class="nav nav-tabs px-3">
+        {# Primary tab #}
+        <li class="nav-item" role="presentation">
+            <a class="nav-link{% if not tab %} active{% endif %}"
+               href="{{ object.get_absolute_url }}">Reorder Rack</a>
+        </li>
+    </ul>
+{% endblock tabs %}
+{% block content-wrapper %}
+    <div class="tab-content">
+        {% block content %}
+            <div class="row">
+                <div class="d-flex justify-content-end btn-list mb-2">
+                    <select class="btn btn-outline-secondary no-ts rack-view" id="view-selector">
+                        <option value="images-and-labels" selected="selected">{% trans "Images and Labels" %}</option>
+                        <option value="images-only">{% trans "Images only" %}</option>
+                        <option value="labels-only">{% trans "Labels only" %}</option>
+                    </select>
+                    <button class="btn btn-success" id="saveButton" disabled>Save</button>
+                </div>
+            </div>
+            <div class="container mt-2">
+                <div class="row">
+                    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 text-center">
+                        <h4>Front</h4>
+                        {% include "netbox_reorder_rack/inc/rack_elevation.html" with units=front_units face="front" %}
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 text-center">
+                        <h4>Back</h4>
+                        {% include "netbox_reorder_rack/inc/rack_elevation.html" with units=rear_units face="rear" %}
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 text-center">
+                        <h4>Non-Racked Devices</h4>
+                        <div class="d-flex justify-content-center">
+                            <div class="grid-stack rack"
+                                 id="grid-other"
+                                 gs-column="2"
+                                 gs-max-row="150"
+                                 gs-min-row="{{ object.u_height|mul:2 }}"
+                                 data-grid-id="2">
+                                {% for device in non_racked %}
+                                    <div class="grid-stack-item"
+                                         gs-w="2"
+                                         gs-h="{{ device.device_type.u_height|mul:2 }}"
+                                         gs-x="0"
+                                         gs-id="{{ device.id }}"
+                                         gs-locked="false"
+                                         data-item-face="none"
+                                         data-item-color="{{ device.role.color }}"
+                                         data-item-text-color="{% if device.role.color %}{{ device.role.color|text_color }}{% else %}000000{% endif %}"
+                                         data-full-depth="{{ device.device_type.is_full_depth }}"
+                                         gs-locked="{% if not request.user|can_change:device %}true{% else %}{% endif %}"
+                                         gs-no-move="{% if not request.user|can_change:device %}true{% else %}{% endif %}">
+                                        <div class="grid-stack-item-content"
+                                             style="{% if device.device_type.front_image and images %}background-image: url('{{ base_url }}{{ device.device_type.front_image.url }}');
+                                                    background-size: {{ unit_width }}px;
+                                                    {% else %}background-color: #{{ device.role.color }};
+                                                    {% endif %} color: #{% if device.role.color %}{{ device.role.color|text_color }}{% else %}000000{% endif %}">
+                                            {% if not device.name %}
+                                                {{ device.device_type }}
+                                            {% else %}
+                                                {{ device.name }}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endblock content %}
+    </div>
 {% endblock content-wrapper %}
-
 {% block javascript %}
-<script type="text/javascript">
+    <script type="text/javascript">
   const basePath = '{{ basepath }}';
   const netbox_csrf_token = '{{ csrf_token }}'
   const returnUrl = '{{ object.get_absolute_url }}';
   const rackId = {{ object.id }};
   const descUnits = {{ object.desc_units | lower }};
-</script>
-<script src="{% static 'netbox_reorder_rack/js/rack.js' %}" defer></script>
-
-{% endblock %}
+    </script>
+    <script src="{% static 'netbox_reorder_rack/js/rack.js' %}" defer></script>
+{% endblock javascript %}
