@@ -1,4 +1,4 @@
-{% extends 'base/layout.html' %}
+{% extends "base/layout.html" %}
 {% load helpers %}
 {% load tabs %}
 {% load static %}
@@ -8,7 +8,7 @@
 {% block head %}
     <link rel="stylesheet"
           href="{% static 'netbox_reorder_rack/css/rack.css' %}">
-{% endblock %}
+{% endblock head %}
 {% block header %}
     <div class="d-flex justify-content-between align-items-center">
         {# Breadcrumbs #}
@@ -45,15 +45,17 @@
         </div>
     </div>
     {{ block.super }}
-{% endblock %}
-{% block title %}Reorder {{ object }}{% endblock %}
+{% endblock header %}
+{% block title %}
+    Reorder {{ object }}
+{% endblock title %}
 {% block subtitle %}
     <div class="object-subtitle">
         <span>Created {{ object.created|isodatetime }}</span>
         <span class="separator">&middot;</span>
         <span>Updated <span title="{{ object.last_updated }}">{{ object.last_updated|timesince }}</span> ago</span>
     </div>
-{% endblock %}
+{% endblock subtitle %}
 {% block tabs %}
     <ul class="nav nav-tabs px-3">
         {# Primary tab #}
@@ -80,11 +82,11 @@
                 <div class="row">
                     <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 text-center">
                         <h4>Front</h4>
-                        {% include 'netbox_reorder_rack/inc/rack_elevation.html' with units=front_units face='front' %}
+                        {% include "netbox_reorder_rack/inc/rack_elevation.html" with units=front_units face="front" %}
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 text-center">
                         <h4>Back</h4>
-                        {% include 'netbox_reorder_rack/inc/rack_elevation.html' with units=rear_units face='rear' %}
+                        {% include "netbox_reorder_rack/inc/rack_elevation.html" with units=rear_units face="rear" %}
                     </div>
                     <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 text-center">
                         <h4>Non-Racked Devices</h4>
@@ -138,4 +140,4 @@
   const descUnits = {{ object.desc_units | lower }};
     </script>
     <script src="{% static 'netbox_reorder_rack/js/rack.js' %}" defer></script>
-{% endblock %}
+{% endblock javascript %}
