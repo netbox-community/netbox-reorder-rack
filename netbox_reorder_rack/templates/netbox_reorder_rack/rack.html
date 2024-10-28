@@ -111,7 +111,7 @@
                                          gs-locked="{% if not request.user|can_change:device %}true{% else %}{% endif %}"
                                          gs-no-move="{% if not request.user|can_change:device %}true{% else %}{% endif %}">
                                         <div class="grid-stack-item-content"
-                                             style="{% if device.device_type.front_image and images %}background-image: url('{{ base_url }}{{ device.device_type.front_image.url }}');
+                                             style="{% if device.device_type.front_image and images %}background-image: url('{{ device.device_type.front_image.url }}');
                                                     background-size: {{ unit_width }}px;
                                                     {% else %}background-color: #{{ device.role.color }};
                                                     {% endif %} color: #{% if device.role.color %}{{ device.role.color|text_color }}{% else %}000000{% endif %}">
