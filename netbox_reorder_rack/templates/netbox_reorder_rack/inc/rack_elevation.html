@@ -34,7 +34,7 @@
                              data-item-face="{{ face }}">
                             {% if device.device.device_type.front_image and images %}
                                 <div class="grid-stack-item-content"
-                                     style="background-image: url('{{ base_url }}{{ device.device.device_type.front_image.url }}');
+                                     style="background-image: url('{{ device.device.device_type.front_image.url }}');
                                             background-size: {{ unit_width }}px;
                                             color: #{% if device.device.role.color %}{{ device.device.role.color|text_color }}{% else %}000000{% endif %}">
                                     {% if labels %}{{ device.device | device_name }}{% endif %}
@@ -63,7 +63,7 @@
                              gs-no-move="{% if not request.user|can_change:device.device %}true{% else %}{% endif %}">
                             {% if device.device.device_type.rear_image and images %}
                                 <div class="grid-stack-item-content device_rear"
-                                     style="background-image: url('{{ base_url }}{{ device.device.device_type.rear_image.url }}');
+                                     style="background-image: url('{{ device.device.device_type.rear_image.url }}');
                                             background-size: {{ unit_width }}px;
                                             color: #{% if device.device.role.color %}{{ device.device.role.color|text_color }}{% else %}000000{% endif %}">
                                     {% if labels %}{{ device.device | device_name }}{% endif %}
