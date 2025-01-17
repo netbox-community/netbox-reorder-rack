@@ -48,8 +48,9 @@ systemctl restart netbox
 
 | netbox version | plugin version |
 | -------------- | ----------------------------- |
-| >= 4.0.0 < 4.1.0 | >= v1.1.3                     |
-| <= 4.0.0       | = v1.0.0                      |
+| v4.1.x         | v1.1.3                      |
+| v4.0.x         | v1.1.3                      |
+| <= 4.0.0       | v1.0.0                      |
 
 ## Dependencies
 Python:
