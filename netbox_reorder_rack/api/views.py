@@ -101,13 +101,14 @@ class SaveViewSet(PermissionRequiredMixin, viewsets.ViewSet):
         """Helper method to update device positions based on the category."""
         changes_made = False  # Local flag to track if changes are made
 
-        for device_data in device_data_list:
-            device = rack.devices.filter(pk=device_data["id"]).first()
-            current_device = get_object_or_404(
-                Device.objects.restrict(request.user), pk=device_data["id"]
-            )
+        if is_other:
+            for device_data in device_data_list:
+                device = rack.devices.filter(pk=device_data["id"]).first()
+                current_device = get_object_or_404(
+                    Device.objects.restrict(request.user), pk=device_data["id"]
+                )
 
-            if is_other:
+                """ is_other are unracked devices """
                 if device.position != device_data["y"]:
                     device.position = None
                     device.face = ""
@@ -117,20 +118,38 @@ class SaveViewSet(PermissionRequiredMixin, viewsets.ViewSet):
                     device.clean()
                     device.save()
                     changes_made = True
-            # Update position and face for 'front' and 'rear' devices if changed
-            elif not is_other:
+        else:
+            """ loop1 - find and set to None impacted devices """
+            impacted_devices = []
+            impacted_devices_new_data = {}
+            for device_data in device_data_list:
+                device = rack.devices.filter(pk=device_data["id"]).first()
+                current_device = get_object_or_404(
+                    Device.objects.restrict(request.user), pk=device_data["id"]
+                )
                 if current_device.face != device_data[
                     "face"
                 ] or device.position != decimal.Decimal(device_data["y"]):
-                    device.position = decimal.Decimal(device_data["y"])
-                    device.face = device_data["face"]
-
                     self._check_permission(request, device, permission)
 
-                    # Save the device and mark changes as made
+                    impacted_devices.append(device)
+                    impacted_devices_new_data[device.id] = {}
+                    impacted_devices_new_data[device.id]["position"] = decimal.Decimal(device_data["y"])
+                    impacted_devices_new_data[device.id]["face"] = device_data["face"]
+
+                    device.position = None
+                    device.face = None
                     device.clean()
                     device.save()
                     changes_made = True
+            """ apply new positions """
+            for device in impacted_devices:
+                device.position = impacted_devices_new_data[device.id]["position"]
+                device.face = impacted_devices_new_data[device.id]["face"]
+                device.clean()
+                device.save()
+                changes_made = True
+                
 
         return changes_made  # Return whether changes were made
 
