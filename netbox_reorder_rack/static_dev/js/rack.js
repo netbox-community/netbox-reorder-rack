@@ -37,7 +37,7 @@ function createToast(level, title, message, extra) {
 
   // Create the toast header
   const header = document.createElement('div');
-  header.setAttribute('class', `toast-header bg-${level} text-dark`);
+  header.setAttribute('class', `toast-header bg-${level}`);
 
   // Add the icon to the header
   const icon = document.createElement('i');
@@ -57,7 +57,7 @@ function createToast(level, title, message, extra) {
 
   // Create the toast body
   const body = document.createElement('div');
-  body.setAttribute('class', 'toast-body text-dark');
+  body.setAttribute('class', 'toast-body');
   body.innerText = message.trim();
 
   // Assemble the header
@@ -67,7 +67,6 @@ function createToast(level, title, message, extra) {
   // If extra info is provided, add it to the header
   if (typeof extra !== 'undefined') {
     const extraElement = document.createElement('small');
-    extraElement.setAttribute('class', 'text-dark');
     extraElement.innerText = extra;
     header.appendChild(extraElement);
   }
