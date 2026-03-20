@@ -66,8 +66,6 @@ class SaveViewSet(PermissionRequiredMixin, viewsets.ViewSet):
                     rack,
                     serializer.validated_data["other"],
                     permission,
-                    "other",
-                    is_other=True,
                 )
 
                 # If no changes were made, return 304 or a custom response
@@ -95,48 +93,126 @@ class SaveViewSet(PermissionRequiredMixin, viewsets.ViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-    def _update_device_positions(
-        self, request, rack, device_data_list, permission, device_type, is_other=False
-    ):
-        """Helper method to update device positions based on the category."""
-        changes_made = False  # Local flag to track if changes are made
+    def _get_target_location(self, device_data, face):
+        """Get target position and face for a device."""
+        if face is None:
+            return None, ""
+        return decimal.Decimal(device_data["y"]), device_data["face"]
 
-        for device_data in device_data_list:
-            device = rack.devices.filter(pk=device_data["id"]).first()
-            current_device = get_object_or_404(
-                Device.objects.restrict(request.user), pk=device_data["id"]
-            )
+    def _has_conflict(self, target_pos, target_face, occupied_positions):
+        """Check if target location conflicts with occupied positions."""
+        if target_pos is None:
+            return False
+        return (target_pos, target_face) in occupied_positions
 
-            if is_other:
-                if device.position != device_data["y"]:
-                    device.position = None
-                    device.face = ""
-                    self._check_permission(request, device, permission)
+    def _move_device(self, device, position, face, request, permission):
+        """Move a device to a new position and face."""
+        if device.position == position and device.face == face:
+            return False
 
-                    # Save the device and mark changes as made
-                    device.clean()
-                    device.save()
-                    changes_made = True
-            # Update position and face for 'front' and 'rear' devices if changed
-            elif not is_other:
-                if current_device.face != device_data[
-                    "face"
-                ] or device.position != decimal.Decimal(device_data["y"]):
-                    device.position = decimal.Decimal(device_data["y"])
-                    device.face = device_data["face"]
-
-                    self._check_permission(request, device, permission)
-
-                    # Save the device and mark changes as made
-                    device.clean()
-                    device.save()
-                    changes_made = True
-
-        return changes_made  # Return whether changes were made
-
-    def _check_permission(self, request, device, permission):
-        """Helper method to check if the user has permission for the device."""
         if not request.user.has_perm(permission, obj=device):
             raise PermissionDenied(
                 _(f"You do not have permissions to edit {get_device_name(device)}.")
             )
+
+        device.position = position
+        device.face = face if face else ""
+        device.clean()
+        device.save()
+        return True
+
+    def _update_device_positions(
+        self, request, rack, device_data_list, permission, face=None
+    ):
+        """Update device positions with conflict resolution."""
+        if not device_data_list:
+            return False
+
+        changes_made = False    # Local flag to track if changes are made
+        pending = []
+
+        # Build pending moves list
+        for device_data in device_data_list:
+            device = rack.devices.filter(pk=device_data["id"]).first()
+            if not device:
+                continue
+
+            target_pos, target_face = self._get_target_location(device_data, face)
+            current_pos = device.position
+            current_face = device.face if device.face else ""
+
+            if current_pos != target_pos or current_face != target_face:
+                pending.append(
+                    {
+                        "device": device,
+                        "target_pos": target_pos,
+                        "target_face": target_face,
+                    }
+                )
+
+        # Track currently occupied positions
+        occupied = {
+            (m["device"].position, m["device"].face if m["device"].face else ""): m[
+                "device"
+            ]
+            for m in pending
+            if m["device"].position is not None
+        }
+
+        # Process moves until none remain
+        max_iterations = len(pending) * 2
+        iteration = 0
+
+        while pending and iteration < max_iterations:
+            iteration += 1
+            moved = []
+
+            for move in pending:
+                device = move["device"]
+                target_pos = move["target_pos"]
+                target_face = move["target_face"]
+
+                # Check if target is blocked
+                if self._has_conflict(target_pos, target_face, occupied):
+                    blocker = occupied.get((target_pos, target_face))
+                    # Skip if blocker hasn't moved yet
+                    if (
+                        blocker
+                        and blocker.id != device.id
+                        and blocker in [m["device"] for m in pending]
+                    ):
+                        continue
+
+                # Clear current position from occupied
+                current_key = (device.position, device.face if device.face else "")
+                if current_key in occupied and occupied[current_key].id == device.id:
+                    del occupied[current_key]
+
+                # Move device
+                if self._move_device(
+                    device, target_pos, target_face, request, permission
+                ):
+                    changes_made = True
+
+                # Update occupied with new position
+                if target_pos is not None:
+                    occupied[(target_pos, target_face)] = device
+
+                moved.append(move)
+
+            # Remove completed moves
+            for move in moved:
+                pending.remove(move)
+
+            # Break circular dependencies by temporarily unracking
+            if not moved and pending:
+                victim = pending[0]
+                device = victim["device"]
+                current_key = (device.position, device.face if device.face else "")
+                if current_key in occupied:
+                    del occupied[current_key]
+
+                if self._move_device(device, None, "", request, permission):
+                    changes_made = True
+
+        return changes_made
