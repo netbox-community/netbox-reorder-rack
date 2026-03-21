@@ -134,12 +134,11 @@ function initializeGrid(element, acceptWidgets) {
 
 function saveRack(rack_id, desc_units) {
   getItems(grids);
-  var data = {};
+  var data = { 'rack_id': rack_id, 'elements': [] };
 
   // Get the items from the grids
   gridItemsMap.forEach((grid, gridIndex) => {
-    // Initialize an array to store the data for each grid
-    let gridData = [];
+    let face = gridIndex === 0 ? 'front' : (gridIndex === 1 ? 'rear' : null);
 
     // Iterate over the keys in the grid object
     for (let key in grid) {
@@ -170,24 +169,13 @@ function saveRack(rack_id, desc_units) {
         }
 
         // Push the item data to the 'gridData' array
-        gridData.push({
+        data['elements'].push({
           'id': parseInt(item.getAttribute('gs-id')),
-          'x': parseInt(item.getAttribute('gs-x')),
-          'y': u_position,
-          'is_full_depth': item.getAttribute('data-full-depth'),
-          'face': item.getAttribute('data-item-face'),
+          'position': u_position,
+          'face': face,
         });
       }
     }
-
-    // Assign the 'gridData' array to the corresponding index in the 'data' array
-    names = {
-      0: 'front',
-      1: 'rear',
-      2: 'other'
-    }
-    data[names[gridIndex]] = gridData;
-    data['rack_id'] = rack_id;
   });
 
   try {
