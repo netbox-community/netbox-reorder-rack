@@ -43,6 +43,25 @@ two major versions of Gridstack, so a minor release rather than a patch is appro
 
 ### Other Changes
 
+* **The reorder page now uses NetBox's declarative UI components.** `ReorderView` is a
+  `generic.ObjectView` carrying a `SimpleLayout`, with the elevation embedded as a
+  `TemplatePanel` — the same approach NetBox uses for its own rack elevations. The page also
+  registers a `ViewTab`, so it appears as a tab on the rack rather than a standalone page.
+
+    This fixes chrome that never rendered. The template previously extended
+    `base/layout.html` and hand-copied NetBox's breadcrumbs, object identifier, subtitle and
+    tab strip; `base/layout.html` defines no `subtitle`, `tabs` or `content-wrapper` blocks,
+    and Django ignores unknown blocks silently, so the subtitle and tab strip were absent on
+    every page load. Both now render. `rack.html` drops from 143 lines to 18, keeping only the
+    CSS and JavaScript blocks a panel cannot reach.
+
+* **Fixed a duplicated `gs-locked` attribute** in the rack elevation template. Because HTML
+  uses the first of a duplicated attribute, the literal `gs-locked="false"` overrode the
+  permission-derived value that followed it, so rear-face devices were never lock-flagged for
+  users without change permission. Dragging was still prevented by `gs-no-move`, which was not
+  duplicated, so this weakened the lock rather than bypassing permissions. It was also the
+  outstanding `djlint` H037 error, so `pre-commit` now passes.
+
 * **All four outstanding dependency advisories resolved** (`braces`, `picomatch`, `immutable`,
   `esbuild`). None was reachable by users — all were build-time only, and none appears in the
   shipped bundle. Three came solely from `esbuild-sass-plugin` → `sass` → `chokidar`, which was

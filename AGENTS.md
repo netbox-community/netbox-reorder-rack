@@ -35,7 +35,9 @@ The plugin declares **no** `install_requires`. All front-end versions are pinned
 │   ├── api/urls.py              — NetBoxRouter, registered as 'save'.
 │   ├── templatetags/rack.py     — Filters used by the elevation template.
 │   ├── templates/netbox_reorder_rack/
-│   │   ├── rack.html            — The reorder page. Extends base/layout.html.
+│   │   ├── rack.html            — Thin shell: extends generic/object.html, supplies only the
+│   │   │                          CSS/JS asset blocks. Page body comes from the view's layout.
+│   │   ├── inc/reorder.html     — The elevation, rendered as a TemplatePanel.
 │   │   ├── inc/rack_elevation.html — One elevation (front or rear).
 │   │   └── inc/rack_button.html — The Reorder button.
 │   ├── static/netbox_reorder_rack/  — BUILT OUTPUT, committed. Do not hand-edit.
@@ -63,9 +65,9 @@ The plugin declares **no** `install_requires`. All front-end versions are pinned
 ```
 Rack detail view
   └─ ReorderButton (template_content.py) → dcim:rack_reorder
-       └─ ReorderView (views.py)
-            renders rack.get_rack_units(expand_devices=False, face=...) for both faces
-            plus non-racked devices, into rack.html
+       └─ ReorderView (views.py) — a generic.ObjectView with a declarative layout
+            get_extra_context() supplies rack.get_rack_units(expand_devices=False, face=...)
+            for both faces plus non-racked devices, to inc/reorder.html via a TemplatePanel
               └─ static/.../rack.js (Gridstack) rearranges in the browser
                    └─ PUT /api/plugins/reorder/save/<rack_pk>/
                         └─ SaveViewSet writes Device.position / Device.face
@@ -79,9 +81,13 @@ Rack detail view
 
 `other` is the non-racked list: those devices get `position = None` and `face = ""`.
 
-### Views are not generic
+### Views
 
-`ReorderView` is a plain `django.views.View` with Django's `LoginRequiredMixin` / `PermissionRequiredMixin`, registered on `Rack` (not on a plugin model) with `register_model_view(Rack, name="reorder", path="reorder")`, which produces the URL name `dcim:rack_reorder`.
+`ReorderView` is a `generic.ObjectView` on `Rack` (not on a plugin model), registered with `register_model_view(Rack, name="reorder", path="reorder")`, which produces the URL name `dcim:rack_reorder`. It carries a `ViewTab`, so it appears as a tab on the rack.
+
+Its page is built from NetBox's declarative UI components (available since NetBox 4.5; breadcrumbs since 4.7): a `SimpleLayout` supplies the breadcrumbs and a `TemplatePanel` embeds the elevation. This is how NetBox renders its own rack elevations. See [UI Components](https://netboxlabs.com/docs/netbox/plugins/development/ui-components/).
+
+`has_permission()` is overridden rather than `get_required_permission()`. NetBox's default restricts the view's queryset using the required permission's action, which would demand *rack* permissions; this view repositions devices, so it requires `dcim.view_device` and `dcim.change_device` and leaves the rack queryset unrestricted — the contract it has always had.
 
 `SaveViewSet` is a bare DRF `ViewSet`, not a `NetBoxModelViewSet` — there is no model to serialize.
 
@@ -89,7 +95,9 @@ Rack detail view
 
 ### Template blocks
 
-`rack.html` extends `base/layout.html` and overrides `head`, `header`, `title`, `content` and `javascript`, which exist there — plus `subtitle`, `tabs` and `content-wrapper`, which **do not**. Django ignores unknown blocks silently, so those three have never rendered. That block set is unchanged from NetBox 4.3 through 4.7, so it is long-standing rather than a regression. `breadcrumbs` and `object_identifier` are the plugin's own nested blocks and do work.
+`rack.html` extends `generic/object.html`, which defines `breadcrumbs`, `object_identifier`, `subtitle`, `tabs`, `title` and `content`. The template overrides only `head` and `javascript` — the asset blocks a panel cannot reach — and lets everything else come from the layout.
+
+It previously extended `base/layout.html` and hand-copied that chrome. `base/layout.html` defines none of `subtitle`, `tabs` or `content-wrapper`, and Django ignores unknown blocks silently, so those three never rendered. Extend `generic/object.html` for object pages.
 
 ### Front-end
 
