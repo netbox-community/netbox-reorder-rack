@@ -25,11 +25,10 @@ import sys
 
 import requests
 
-# Local development defaults, overridden by the environment variables of the same name.
-# This token is only good against a throwaway local NetBox; do not point it at anything
-# real, and prefer setting NETBOX_TOKEN instead of relying on the default.
+# NETBOX_TOKEN is required and has no default: an API token is a credential, and one
+# committed here would be a credential published to anyone who clones the repository. The
+# host falls back to the usual local development address, which is not a secret.
 DEFAULT_HOST = "http://localhost:8000"
-DEFAULT_TOKEN = "wtJ9SQjwXitaR8hILEIMiFvrkmIHkmkfo02VaU35"
 
 TAG = {
     "name": "reorder-rack-sample",
@@ -473,8 +472,8 @@ def main():
     parser = argparse.ArgumentParser(
         description="Create sample rack and device data for netbox-reorder-rack.",
         epilog=(
-            "Connection details come from the environment: NETBOX_HOST (default "
-            f"{DEFAULT_HOST}) and NETBOX_TOKEN. Every object created is tagged "
+            "Connection details come from the environment. NETBOX_TOKEN is required; "
+            f"NETBOX_HOST defaults to {DEFAULT_HOST}. Every object created is tagged "
             f"{TAG['slug']!r}, which is how --clean finds them again. Re-running clears "
             "the positions of the sample devices and re-applies the layout, so a rack "
             "that has been rearranged in the UI can be reset for another test."
@@ -487,8 +486,15 @@ def main():
     )
     args = parser.parse_args()
 
-    host = os.environ.get("NETBOX_HOST", DEFAULT_HOST)
-    token = os.environ.get("NETBOX_TOKEN", DEFAULT_TOKEN)
+    host = os.getenv("NETBOX_HOST", DEFAULT_HOST)
+    token = os.getenv("NETBOX_TOKEN")
+    if not token:
+        sys.exit(
+            "NETBOX_TOKEN is not set. Create an API token in NetBox under "
+            "Admin > API Tokens, then export it, for example:\n\n"
+            "    export NETBOX_TOKEN=<your token>\n"
+            f"    export NETBOX_HOST={DEFAULT_HOST}    # optional; this is the default\n"
+        )
     nb = NetBox(host, token)
 
     try:
