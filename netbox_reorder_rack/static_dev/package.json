@@ -12,7 +12,6 @@
     "gridstack": "12.6.0"
   },
   "devDependencies": {
-    "esbuild": "^0.20.1",
-    "esbuild-sass-plugin": "^3.1.0"
+    "esbuild": "0.28.2"
   }
 }

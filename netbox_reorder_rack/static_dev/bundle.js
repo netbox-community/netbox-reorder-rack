@@ -1,5 +1,4 @@
 const esbuild = require('esbuild')
-const { sassPlugin } = require('esbuild-sass-plugin')
 
 const options = {
     bundle: true,
@@ -10,7 +9,6 @@ const options = {
 }
 
 const ARGS = process.argv.slice(2)
-const noCache = ARGS.includes('--no-cache')
 
 async function bundleScripts() {
     const entryPoints = {
@@ -42,19 +40,18 @@ async function bundleStyles() {
         const entryPoints = {
             rack: 'css/rack.css',
         }
-        const pluginOptions = { outputStyle: 'compressed' }
-        // Allow cache disabling.
-        if (noCache) {
-            pluginOptions.cache = false
-        }
 
+        // The styles are plain CSS, which esbuild bundles and minifies natively. There is
+        // no Sass plugin: it pulled in sass -> chokidar -> braces/picomatch and
+        // sass -> immutable purely as build-time dependencies, all of which carried
+        // advisories, for a stylesheet that uses no Sass features. If .scss is ever needed
+        // here, reintroduce a Sass plugin at that point.
         const result = await esbuild.build({
             ...options,
             outdir: '../static/netbox_reorder_rack/css/',
-            // Disable sourcemaps for CSS/SCSS files, see #7068
+            // Disable sourcemaps for CSS files, see #7068
             sourcemap: false,
             entryPoints,
-            plugins: [sassPlugin(pluginOptions)],
             loader: {
                 '.eot': 'file',
                 '.woff': 'file',

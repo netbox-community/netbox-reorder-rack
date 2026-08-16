@@ -54,6 +54,14 @@ in step with it. This matters because NetBox loads **gridstack's CSS globally** 
 gridstack's **JavaScript** — so a version drift pairs one generation of the CSS with another
 of the engine. Check NetBox's `netbox/project-static/package.json` for the versions to match.
 
+Every dependency is pinned exactly, with no `^` or `~` ranges. Gridstack and Bootstrap are
+pinned so they cannot drift away from the versions NetBox serves; esbuild is pinned because
+it is pre-1.0, where minor releases may carry breaking changes, and because it determines the
+bytes of the committed bundle — a floating range would make the build unreproducible across
+contributors.
+
+Bump a version deliberately, then rebuild and commit the resulting bundle.
+
 Two unmet peer dependency warnings from `yarn install` are expected and harmless:
 `@popperjs/core` (only needed by the Bootstrap components this plugin does not use — it
 imports `Toast` directly to avoid pulling them in) and `sass-embedded` (only needed to
