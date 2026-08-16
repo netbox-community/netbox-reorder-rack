@@ -1,6 +1,10 @@
 // Variable to track whether changes have been made
 import { GridStack } from 'gridstack';
-import { Toast } from 'bootstrap';
+// Import Toast directly rather than from 'bootstrap': the package entry point pulls in
+// every component, including the ones that require @popperjs/core (a peer dependency
+// this plugin does not declare), so the build only succeeded when a package manager
+// happened to auto-install that peer. Toast needs no popper.
+import Toast from 'bootstrap/js/dist/toast.js';
 
 var changesMade = false;
 var gridItemsMap = [];
@@ -119,12 +123,14 @@ function acceptOtherWidgets(e) {
 }
 
 function initializeGrid(element, acceptWidgets) {
-  return GridStack.init(options = {
+  // disableOneColumnMode was removed in gridstack v12.1.0. Responsive column collapsing is
+  // now opt-in via columnOpts, which is absent from gridDefaults, so simply not setting it
+  // gives the fixed single-column-free layout this option used to request.
+  return GridStack.init({
     cellHeight: 11,
     margin: 0,
     marginBottom: 1,
     float: true,
-    disableOneColumnMode: true,
     animate: true,
     removeTimeout: 100,
     disableResize: true,
@@ -314,8 +320,10 @@ grids.forEach(function (grid, gridIndex) {
           subDiv.classList.add('device_rear');
           itemContent.setAttribute('data-item-face', 'back');
 
-          // Add the cloned widget to the other grid
-          otherGrid.addWidget(itemContent);
+          // Add the cloned widget to the other grid.
+          // makeWidget() rather than addWidget(): as of gridstack v11, addWidget() no
+          // longer accepts an HTMLElement and logs an error before delegating here anyway.
+          otherGrid.makeWidget(itemContent);
         }
       }
 

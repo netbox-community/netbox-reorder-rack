@@ -61,9 +61,12 @@ systemctl restart netbox
 Python:
   - None
 
-Javascript:
-  - Gridstack (Currently running same versions as Netbox)
-  - Bootstrap (Currently running same versions as Netbox)
+Javascript (bundled with the plugin, pinned to the versions NetBox ships):
+  - [Gridstack](https://gridstackjs.com/) 12.6.0
+  - [Bootstrap](https://getbootstrap.com/) 5.3.8
+
+See [Development](docs/development.md) for how these are built and why the versions must
+track NetBox's.
 
 ### Update
 
