@@ -5,7 +5,8 @@
 # The data set is built around the cases the reorder view has to render, rather than
 # around plausible-looking inventory:
 #
-# * devices of several heights, so multi-unit widgets are covered;
+# * devices of several heights, so multi-unit widgets are covered, including 0.5U and
+#   1.5U devices, which the grid has to draw in rows of half a rack unit;
 # * full-depth devices, which appear on both faces, alongside half-depth devices, which
 #   appear on only one — moving a full-depth device is the case that historically broke;
 # * devices mounted on the rear face, including one sitting behind a half-depth front
@@ -25,10 +26,9 @@ import sys
 
 import requests
 
-# NETBOX_TOKEN is required and has no default: an API token is a credential, and one
-# committed here would be a credential published to anyone who clones the repository. The
-# host falls back to the usual local development address, which is not a secret.
-DEFAULT_HOST = "http://localhost:8000"
+# Both connection settings come from the environment, with no defaults. A token is a
+# credential, and one committed here would be published to anyone who clones the repository;
+# requiring the host too means the script can never quietly aim at the wrong instance.
 
 TAG = {
     "name": "reorder-rack-sample",
@@ -58,7 +58,6 @@ DEVICE_ROLES = [
     {"name": "Sample Server", "slug": "sample-server", "color": "4caf50"},
     {"name": "Sample Storage", "slug": "sample-storage", "color": "ffeb3b"},
     {"name": "Sample Patch Panel", "slug": "sample-patch-panel", "color": "9c27b0"},
-    {"name": "Sample PDU", "slug": "sample-pdu", "color": "f44336"},
     {"name": "Sample Blade", "slug": "sample-blade", "color": "607d8b"},
 ]
 
@@ -93,14 +92,6 @@ DEVICE_TYPES = [
         "u_height": 1,
         "is_full_depth": False,
     },
-    # 0U devices cannot be mounted at a position, so these only ever appear in the
-    # non-racked column.
-    {
-        "model": "Sample PDU 0U",
-        "slug": "sample-pdu-0u",
-        "u_height": 0,
-        "is_full_depth": False,
-    },
     # Fractional heights: the grid is two rows per rack unit, so these are the cases that
     # were truncated to whole units (issues #25 and #35).
     {
@@ -123,6 +114,10 @@ DEVICE_TYPES = [
         "subdevice_role": "parent",
         "bays": ["Bay 1", "Bay 2", "Bay 3", "Bay 4"],
     },
+    # The one 0U type here, and only because NetBox requires it: creating a child device type
+    # with any other height is rejected with "Child device types must be 0U." A child device
+    # consumes no rack units of its own, and this one exists to cover the view's handling of
+    # devices installed in bays.
     {
         "model": "Sample Blade",
         "slug": "sample-blade",
@@ -156,8 +151,9 @@ RACKS = [
             ("sample-pp-02", "sample-patch-panel-1u", "sample-patch-panel", 41, "rear"),
             ("sample-sw-03", "sample-switch-1u", "sample-switch", 20, "rear"),
             ("sample-srv-04", "sample-server-2u", "sample-server", 17, "rear"),
-            # Fractional heights, stacked as in issue #35: two 0.5U devices filling
-            # one unit, with a 1.5U device directly above them.
+            # Fractional heights. The first three reproduce issue #35: two 0.5U devices
+            # filling one unit, with a 1.5U device directly above them. The second 1.5U
+            # device then starts on a half-unit boundary, so the pair spans U27 to U29.
             (
                 "sample-pp-half-01",
                 "sample-patch-panel-0-5u",
@@ -179,9 +175,14 @@ RACKS = [
                 27,
                 "front",
             ),
+            (
+                "sample-cm-02",
+                "sample-cable-manager-1-5u",
+                "sample-patch-panel",
+                28.5,
+                "front",
+            ),
             # Non-racked: assigned to the rack, but not mounted.
-            ("sample-pdu-01", "sample-pdu-0u", "sample-pdu", None, None),
-            ("sample-pdu-02", "sample-pdu-0u", "sample-pdu", None, None),
             ("sample-srv-05", "sample-server-1u", "sample-server", None, None),
         ],
     },
@@ -509,11 +510,11 @@ def main():
     parser = argparse.ArgumentParser(
         description="Create sample rack and device data for netbox-reorder-rack.",
         epilog=(
-            "Connection details come from the environment. NETBOX_TOKEN is required; "
-            f"NETBOX_HOST defaults to {DEFAULT_HOST}. Every object created is tagged "
-            f"{TAG['slug']!r}, which is how --clean finds them again. Re-running clears "
-            "the positions of the sample devices and re-applies the layout, so a rack "
-            "that has been rearranged in the UI can be reset for another test."
+            "NETBOX_HOST and NETBOX_TOKEN must both be set in the environment; neither has "
+            f"a default. Every object created is tagged {TAG['slug']!r}, which is how "
+            "--clean finds them again. Re-running clears the positions of the sample "
+            "devices and re-applies the layout, so a rack that has been rearranged in the "
+            "UI can be reset for another test."
         ),
     )
     parser.add_argument(
@@ -523,14 +524,19 @@ def main():
     )
     args = parser.parse_args()
 
-    host = os.getenv("NETBOX_HOST", DEFAULT_HOST)
+    host = os.getenv("NETBOX_HOST")
     token = os.getenv("NETBOX_TOKEN")
-    if not token:
+    missing = [
+        name
+        for name, value in (("NETBOX_HOST", host), ("NETBOX_TOKEN", token))
+        if not value
+    ]
+    if missing:
         sys.exit(
-            "NETBOX_TOKEN is not set. Create an API token in NetBox under "
-            "Admin > API Tokens, then export it, for example:\n\n"
+            f"{' and '.join(missing)} must be set. Create an API token in NetBox under "
+            "Admin > API Tokens, then set both, for example:\n\n"
+            "    export NETBOX_HOST=http://localhost:8000\n"
             "    export NETBOX_TOKEN=<your token>\n"
-            f"    export NETBOX_HOST={DEFAULT_HOST}    # optional; this is the default\n"
         )
     nb = NetBox(host, token)
 
