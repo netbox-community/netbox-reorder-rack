@@ -1,80 +1,89 @@
 <p align="center"><img src="docs/img/reorder-rack.svg"></p>
 
-<h1 align="center">Netbox Reorder Rack Plugin</h1>
+<h1 align="center">NetBox Reorder Rack Plugin</h1>
 
-![Version](https://img.shields.io/pypi/v/netbox-reorder-rack) ![Downloads](https://img.shields.io/pypi/dm/netbox-reorder-rack)
+<p align="center">
+<img src="https://img.shields.io/pypi/v/netbox-reorder-rack" alt="Version"/>
+<img src="https://img.shields.io/pypi/dm/netbox-reorder-rack" alt="Downloads"/>
+</p>
 
-Allow the ability to reorder rack units in NetBox using a drag and drop interface.
+This [NetBox](http://netboxlabs.com/oss/netbox/) plugin adds a drag-and-drop rack elevation, so devices can be repositioned by dragging rather than by editing each one and typing a new position.
+
+Front and rear faces are shown side by side with a non-racked devices list, so a device can be moved between positions, between faces, or out of the rack entirely. Nothing is written until you save, and every change is recorded as an ordinary device position — including in NetBox's change log.
 
 ![Reorder Rack](docs/img/netbox-reorder-rack.gif)
 
-> If there are any issues feel free to create an [Issue](https://github.com/minitriga/netbox-reorder-rack/issues) or feel free to contact me directly on Slack in the [NetDev](https://netdev.chat/) community.
+See the [compatibility matrix](COMPATIBILITY.md) for supported NetBox versions, and the [changelog](CHANGELOG.md) for release notes.
+
+> [!NOTE]
+> If you hit a problem, please open an [issue](https://github.com/netbox-community/netbox-reorder-rack/issues), or find us in the [NetDev](https://netdev.chat/) community on Slack.
 
 ## Installation
 
-**_NOTE:_** For docker please see: [Docker install](https://github.com/netbox-community/netbox-docker/wiki/Using-Netbox-Plugins)
+Brief installation instructions are provided below. For a complete installation guide, please refer to the included [documentation](docs/installation.md).
 
-The plugin is available as a Python package and can be installed with pip.
+For NetBox Docker, see [Using NetBox Plugins](https://github.com/netbox-community/netbox-docker/wiki/Using-Netbox-Plugins).
 
-Run the following commands to install the required package after activating the virtual environment:
+1. Install the plugin from [PyPI](https://pypi.org/project/netbox-reorder-rack/):
 
 ```shell
 source /opt/netbox/venv/bin/activate
 pip install netbox-reorder-rack
 ```
 
-To ensure the plugin is automatically re-installed during future upgrades, create a file named `local_requirements.txt` (if it does not exist already) in the NetBox root directory (alongside `requirements.txt`) and list the `netbox-reorder-rack` package:
+2. Add the package to `local_requirements.txt` so it survives future upgrades:
 
 ```shell
 echo netbox-reorder-rack >> local_requirements.txt
 ```
 
-Once installed, the plugin needs to be enabled in your `configuration.py`
+3. Add `netbox_reorder_rack` to `PLUGINS` in `configuration.py`:
 
 ```python
-# In your configuration.py
-PLUGINS = ["netbox_reorder_rack"]
+PLUGINS = [
+    # ...
+    "netbox_reorder_rack",
+]
 ```
 
-You may need to collect static files and restart NetBox for the plugin to be properly installed.
+4. Collect static files and restart NetBox:
 
 ```shell
 python3 manage.py collectstatic --no-input
 systemctl restart netbox
 ```
 
+This plugin requires no database migrations and has no configuration parameters.
 
-## Compatibility Matrix
+> [!IMPORTANT]
+> `collectstatic` is required on every upgrade, not just the first install. The plugin's JavaScript bundle changes between releases, and a stale copy in the static root will keep being served.
 
-| netbox version | plugin version |
-| -------------- | ----------------------------- |
-| v4.5.x         | v1.1.4                      |
-| v4.4.x         | v1.1.4                      |
-| v4.3.x         | v1.1.4                      |
-| v4.2.x         | v1.1.3                      |
-| v4.1.x         | v1.1.3                      |
-| v4.1.x         | v1.1.3                      |
-| v4.0.x         | v1.1.3                      |
-| <= 4.0.0       | v1.0.0                      |
+## Documentation
+
+* [Introduction](docs/index.md) — what the plugin does and how it writes changes back
+* [Installation](docs/installation.md) — full installation and upgrade guide
+* [Reordering a Rack](docs/usage.md) — the drag-and-drop interface
+* [Development](docs/development.md) — dev setup and rebuilding the JavaScript bundle
+* [Change Log](CHANGELOG.md)
 
 ## Dependencies
-Python:
-  - None
 
-Javascript (bundled with the plugin, pinned to the versions NetBox ships):
-  - [Gridstack](https://gridstackjs.com/) 12.6.0
-  - [Bootstrap](https://getbootstrap.com/) 5.3.8
+Python: none.
 
-See [Development](docs/development.md) for how these are built and why the versions must
-track NetBox's.
+JavaScript, bundled with the plugin and pinned to the versions NetBox ships:
 
-### Update
+* [Gridstack](https://gridstackjs.com/) 12.6.0
+* [Bootstrap](https://getbootstrap.com/) 5.3.8
 
-To update the plugin, you need to update the package and restart NetBox.
+See [Development](docs/development.md) for why these versions must track NetBox's.
 
-```shell
-source /opt/netbox/venv/bin/activate
-pip install netbox-reorder-rack
-python3 manage.py collectstatic --no-input
-systemctl restart netbox
-```
+## Contributing
+
+Issues and pull requests are welcomed. See [Development](docs/development.md) for the development environment and the JavaScript build.
+
+This repository follows the same two-branch model as NetBox itself:
+
+* `feature` — active development of future releases. **Base your pull requests on this branch.**
+* `main` — the released code. Releases are cut from here; `feature` is merged into `main` to release.
+
+GitHub defaults the base branch to `main`, so remember to switch the base to `feature` when opening a pull request.
