@@ -1,6 +1,6 @@
 # Change Log
 
-## Unreleased
+## 1.1.5
 
 **Verified against NetBox 4.7.** The plugin's own test suite was run against both NetBox 4.7
 and 4.6.8 with identical results, and every NetBox internal the plugin depends on — including
@@ -8,13 +8,18 @@ and 4.6.8 with identical results, and every NetBox internal the plugin depends o
 and `Location.get_ancestors()` after 4.7 replaced django-mptt with PostgreSQL `ltree` — was
 confirmed present. No plugin code changes were required for 4.7 itself.
 
-A version number has not yet been assigned to this work. The front-end upgrades below cross
-two major versions of Gridstack, so a minor release rather than a patch is appropriate.
+The front-end upgrades below cross two major versions of Gridstack, and the minimum supported
+NetBox version rises to 4.7, so this is a larger release than its patch-level number suggests.
 
 ### Breaking Changes
 
-* None for users. The changes below are confined to the bundled front-end assets and the
-  development toolchain; the Python API, REST endpoint, and permissions are unchanged.
+* **NetBox 4.7 is now the minimum.** The reorder page is built from NetBox's declarative UI
+  components and imports `netbox.ui.breadcrumbs`, which 4.7 introduced, so the plugin no longer
+  imports at all on 4.3 to 4.6. Those versions should stay on 1.1.4. See
+  [`COMPATIBILITY.md`](https://github.com/netbox-community/netbox-reorder-rack/blob/main/COMPATIBILITY.md).
+
+* Nothing else changes for users: the Python API, the REST endpoint, and the permissions the
+  plugin requires are all unchanged.
 
 ### Bug Fixes
 

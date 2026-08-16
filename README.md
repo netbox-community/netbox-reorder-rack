@@ -64,6 +64,7 @@ This plugin requires no database migrations and has no configuration parameters.
 * [Installation](docs/installation.md) — full installation and upgrade guide
 * [Reordering a Rack](docs/usage.md) — the drag-and-drop interface
 * [Development](docs/development.md) — dev setup and rebuilding the JavaScript bundle
+* [Compatibility Matrix](COMPATIBILITY.md) — the NetBox version each release supports
 * [Change Log](CHANGELOG.md)
 
 ## Dependencies
