@@ -4,7 +4,8 @@
 {# declared on ReorderView. Only the asset blocks, which a panel cannot reach, are overridden #}
 {# here; the elevation itself lives in inc/reorder.html as a TemplatePanel. #}
 {% block head %}
-    <link rel="stylesheet" href="{% static 'netbox_reorder_rack/css/rack.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'netbox_reorder_rack/css/rack.css' %}">
 {% endblock head %}
 {% block javascript %}
     <script type="text/javascript">

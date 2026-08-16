@@ -3,6 +3,9 @@ repos:
     rev: v2.3.0
     hooks:
     -   id: check-yaml
+        # mkdocs.yml carries mkdocs-material's !!python/name: tags, which this hook's safe
+        # loader cannot construct. Nothing else in the repo needs excluding.
+        exclude: ^mkdocs\.yml$
     -   id: end-of-file-fixer
     -   id: trailing-whitespace
 -   repo: https://github.com/asottile/reorder-python-imports

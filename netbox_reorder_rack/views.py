@@ -36,6 +36,7 @@ class ReorderView(generic.ObjectView):
     template, embedded as a TemplatePanel, which is how NetBox renders its own rack
     elevations.
     """
+
     queryset = Rack.objects.all()
     template_name = "netbox_reorder_rack/rack.html"
 
@@ -54,7 +55,9 @@ class ReorderView(generic.ObjectView):
                 lambda obj: obj.location.get_ancestors() if obj.location else [],
                 url=filtered_list_url("dcim:rack_list", "location_id"),
             ),
-            Breadcrumb("location", url=filtered_list_url("dcim:rack_list", "location_id")),
+            Breadcrumb(
+                "location", url=filtered_list_url("dcim:rack_list", "location_id")
+            ),
         ],
         bottom_panels=[
             panels.TemplatePanel("netbox_reorder_rack/inc/reorder.html"),

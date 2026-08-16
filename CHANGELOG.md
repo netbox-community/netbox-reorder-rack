@@ -18,6 +18,21 @@ two major versions of Gridstack, so a minor release rather than a patch is appro
 
 ### Bug Fixes
 
+* **Reordering devices no longer fails when they shift into one another's units.** Saving a
+  layout applied each device's new position one at a time, validating each one against the
+  units still held by the devices that had not been saved yet. Dropping a device into a rack
+  so that the devices below it shift down therefore failed with an error such as
+  `U8 is already occupied or does not have sufficient space to accommodate this device type`,
+  naming whichever device was validated before the one beneath it had moved out of the way.
+  The unit reported depended on the order the grid happened to list the devices in.
+
+    Saving in a cleverer order cannot fix this in general, because two devices exchanging
+    places have no valid order. Every moving device is now unmounted in a single bulk update
+    before any of them is placed. That update deliberately bypasses `save()`, so the
+    intermediate, half-empty rack is kept out of the change log; each moving device is still
+    saved exactly once, validated as before, and recorded as a single change log entry.
+    Devices that have not moved are no longer saved at all.
+
 * **Gridstack upgraded from 10.1.2 to 12.6.0**, matching the version NetBox ships. NetBox
   loads Gridstack's **CSS** globally (it imports `gridstack/dist/gridstack.min.css` into its
   own `external.scss`), while this plugin bundles Gridstack's **JavaScript** — so the rack
@@ -80,6 +95,9 @@ two major versions of Gridstack, so a minor release rather than a patch is appro
   yarn.
 
 ### Housekeeping
+
+* Added API regression tests for the save endpoint: shifting a column of devices down by one,
+  and two devices exchanging units. Both fail against the previous save logic.
 
 * Documentation restructured into an MkDocs site, with the compatibility matrix moved out of
   the README into `COMPATIBILITY.md`. A duplicated `v4.1.x` row was removed from the matrix in
