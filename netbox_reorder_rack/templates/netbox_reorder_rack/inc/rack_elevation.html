@@ -22,7 +22,7 @@
                     {% if device.device.face == face %}
                         <div class="grid-stack-item"
                              gs-w="2"
-                             gs-h="{{ device.height|rack_unit_to_int|mul:2 }}"
+                             gs-h="{{ device.height|mul:2 }}"
                              gs-x="0"
                              gs-y="{{ device|calculate_u_position:object }}"
                              gs-id="{{ device.device.id }}"
@@ -50,7 +50,7 @@
                     {% else %}
                         <div class="grid-stack-item"
                              gs-w="2"
-                             gs-h="{{ device.height|rack_unit_to_int|mul:2 }}"
+                             gs-h="{{ device.height|mul:2 }}"
                              gs-x="0"
                              gs-y="{{ device|calculate_u_position:object }}"
                              gs-id="{{ device.device.id }}"

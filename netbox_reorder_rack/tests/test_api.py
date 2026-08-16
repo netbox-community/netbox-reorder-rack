@@ -171,6 +171,29 @@ class ReorderRackAPITest(TestCase):
             self.assertEqual(device.position, expected)
             self.assertEqual(device.face, "front")
 
+    def test_move_two_stacked_devices_down(self):
+        """
+        Issue #34: moving more than one device down at a time.
+
+        Two 2U devices sit on top of each other and both move down by 2U, so the upper one
+        is asked for units the lower one has not left yet. Moving either on its own always
+        worked, which is what made the report specific to multiple devices.
+        """
+        self.grant_change_permission()
+        rack = self.build_rack(
+            "Test Rack Stacked", 12, [("Upper", 2, 10), ("Lower", 2, 8)]
+        )
+        upper = Device.objects.get(name="Upper")
+        lower = Device.objects.get(name="Lower")
+
+        resp = self.put_layout(rack, [(upper, 8), (lower, 6)])
+        self.assertHttpStatus(resp, 201)
+
+        upper.refresh_from_db()
+        lower.refresh_from_db()
+        self.assertEqual(upper.position, 8)
+        self.assertEqual(lower.position, 6)
+
     def test_swap_two_devices(self):
         """
         Two devices exchanging units must succeed.

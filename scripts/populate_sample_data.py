@@ -101,6 +101,20 @@ DEVICE_TYPES = [
         "u_height": 0,
         "is_full_depth": False,
     },
+    # Fractional heights: the grid is two rows per rack unit, so these are the cases that
+    # were truncated to whole units (issues #25 and #35).
+    {
+        "model": "Sample Patch Panel 0.5U",
+        "slug": "sample-patch-panel-0-5u",
+        "u_height": 0.5,
+        "is_full_depth": False,
+    },
+    {
+        "model": "Sample Cable Manager 1.5U",
+        "slug": "sample-cable-manager-1-5u",
+        "u_height": 1.5,
+        "is_full_depth": False,
+    },
     {
         "model": "Sample Chassis 4U",
         "slug": "sample-chassis-4u",
@@ -142,6 +156,29 @@ RACKS = [
             ("sample-pp-02", "sample-patch-panel-1u", "sample-patch-panel", 41, "rear"),
             ("sample-sw-03", "sample-switch-1u", "sample-switch", 20, "rear"),
             ("sample-srv-04", "sample-server-2u", "sample-server", 17, "rear"),
+            # Fractional heights, stacked as in issue #35: two 0.5U devices filling
+            # one unit, with a 1.5U device directly above them.
+            (
+                "sample-pp-half-01",
+                "sample-patch-panel-0-5u",
+                "sample-patch-panel",
+                26,
+                "front",
+            ),
+            (
+                "sample-pp-half-02",
+                "sample-patch-panel-0-5u",
+                "sample-patch-panel",
+                26.5,
+                "front",
+            ),
+            (
+                "sample-cm-01",
+                "sample-cable-manager-1-5u",
+                "sample-patch-panel",
+                27,
+                "front",
+            ),
             # Non-racked: assigned to the rack, but not mounted.
             ("sample-pdu-01", "sample-pdu-0u", "sample-pdu", None, None),
             ("sample-pdu-02", "sample-pdu-0u", "sample-pdu", None, None),

@@ -18,7 +18,25 @@ two major versions of Gridstack, so a minor release rather than a patch is appro
 
 ### Bug Fixes
 
-* **Reordering devices no longer fails when they shift into one another's units.** Saving a
+* **Devices less than a whole rack unit tall now render and save correctly**
+  ([#25](https://github.com/netbox-community/netbox-reorder-rack/issues/25),
+  [#35](https://github.com/netbox-community/netbox-reorder-rack/issues/35)). The elevation is
+  drawn on a grid of half-unit rows, but a device's height was truncated to a whole number
+  before being converted into rows. A 1.5U device was drawn 1U tall, and a 0.5U device was
+  given a height of zero rows. Half-unit devices were also placed one row above where they
+  belong, so the reorder page disagreed with NetBox's own elevation and subsequent saves
+  failed for want of space.
+
+    Saving had the matching problem, in two parts. Gridstack omits the `gs-h` attribute when
+    a widget is its default one row tall, so reading the height from that attribute yielded
+    `NaN` for exactly the 0.5U devices; the geometry now comes from gridstack's own node. And
+    the unit a device was reported at only accounted for its height when that height exceeded
+    1U, which moved every 0.5U device down half a unit on *every* save, including one where
+    nothing had been dragged. Both the page and the save path now use a single formula that
+    holds for fractional heights.
+
+* **Reordering devices no longer fails when they shift into one another's units**
+  ([#34](https://github.com/netbox-community/netbox-reorder-rack/issues/34)). Saving a
   layout applied each device's new position one at a time, validating each one against the
   units still held by the devices that had not been saved yet. Dropping a device into a rack
   so that the devices below it shift down therefore failed with an error such as
