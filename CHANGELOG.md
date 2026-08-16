@@ -18,6 +18,39 @@ two major versions of Gridstack, so a minor release rather than a patch is appro
 
 ### Bug Fixes
 
+* **Devices less than a whole rack unit tall now render and save correctly**
+  ([#25](https://github.com/netbox-community/netbox-reorder-rack/issues/25),
+  [#35](https://github.com/netbox-community/netbox-reorder-rack/issues/35)). The elevation is
+  drawn on a grid of half-unit rows, but a device's height was truncated to a whole number
+  before being converted into rows. A 1.5U device was drawn 1U tall, and a 0.5U device was
+  given a height of zero rows. Half-unit devices were also placed one row above where they
+  belong, so the reorder page disagreed with NetBox's own elevation and subsequent saves
+  failed for want of space.
+
+    Saving had the matching problem, in two parts. Gridstack omits the `gs-h` attribute when
+    a widget is its default one row tall, so reading the height from that attribute yielded
+    `NaN` for exactly the 0.5U devices; the geometry now comes from gridstack's own node. And
+    the unit a device was reported at only accounted for its height when that height exceeded
+    1U, which moved every 0.5U device down half a unit on *every* save, including one where
+    nothing had been dragged. Both the page and the save path now use a single formula that
+    holds for fractional heights.
+
+* **Reordering devices no longer fails when they shift into one another's units**
+  ([#34](https://github.com/netbox-community/netbox-reorder-rack/issues/34)). Saving a
+  layout applied each device's new position one at a time, validating each one against the
+  units still held by the devices that had not been saved yet. Dropping a device into a rack
+  so that the devices below it shift down therefore failed with an error such as
+  `U8 is already occupied or does not have sufficient space to accommodate this device type`,
+  naming whichever device was validated before the one beneath it had moved out of the way.
+  The unit reported depended on the order the grid happened to list the devices in.
+
+    Saving in a cleverer order cannot fix this in general, because two devices exchanging
+    places have no valid order. Every moving device is now unmounted in a single bulk update
+    before any of them is placed. That update deliberately bypasses `save()`, so the
+    intermediate, half-empty rack is kept out of the change log; each moving device is still
+    saved exactly once, validated as before, and recorded as a single change log entry.
+    Devices that have not moved are no longer saved at all.
+
 * **Gridstack upgraded from 10.1.2 to 12.6.0**, matching the version NetBox ships. NetBox
   loads Gridstack's **CSS** globally (it imports `gridstack/dist/gridstack.min.css` into its
   own `external.scss`), while this plugin bundles Gridstack's **JavaScript** — so the rack
@@ -43,6 +76,25 @@ two major versions of Gridstack, so a minor release rather than a patch is appro
 
 ### Other Changes
 
+* **The reorder page now uses NetBox's declarative UI components.** `ReorderView` is a
+  `generic.ObjectView` carrying a `SimpleLayout`, with the elevation embedded as a
+  `TemplatePanel` — the same approach NetBox uses for its own rack elevations. The page also
+  registers a `ViewTab`, so it appears as a tab on the rack rather than a standalone page.
+
+    This fixes chrome that never rendered. The template previously extended
+    `base/layout.html` and hand-copied NetBox's breadcrumbs, object identifier, subtitle and
+    tab strip; `base/layout.html` defines no `subtitle`, `tabs` or `content-wrapper` blocks,
+    and Django ignores unknown blocks silently, so the subtitle and tab strip were absent on
+    every page load. Both now render. `rack.html` drops from 143 lines to 18, keeping only the
+    CSS and JavaScript blocks a panel cannot reach.
+
+* **Fixed a duplicated `gs-locked` attribute** in the rack elevation template. Because HTML
+  uses the first of a duplicated attribute, the literal `gs-locked="false"` overrode the
+  permission-derived value that followed it, so rear-face devices were never lock-flagged for
+  users without change permission. Dragging was still prevented by `gs-no-move`, which was not
+  duplicated, so this weakened the lock rather than bypassing permissions. It was also the
+  outstanding `djlint` H037 error, so `pre-commit` now passes.
+
 * **All four outstanding dependency advisories resolved** (`braces`, `picomatch`, `immutable`,
   `esbuild`). None was reachable by users — all were build-time only, and none appears in the
   shipped bundle. Three came solely from `esbuild-sass-plugin` → `sass` → `chokidar`, which was
@@ -61,6 +113,9 @@ two major versions of Gridstack, so a minor release rather than a patch is appro
   yarn.
 
 ### Housekeeping
+
+* Added API regression tests for the save endpoint: shifting a column of devices down by one,
+  and two devices exchanging units. Both fail against the previous save logic.
 
 * Documentation restructured into an MkDocs site, with the compatibility matrix moved out of
   the README into `COMPATIBILITY.md`. A duplicated `v4.1.x` row was removed from the matrix in

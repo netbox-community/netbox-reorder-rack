@@ -154,11 +154,15 @@ function saveRack(rack_id, desc_units) {
 
       // If the face is not "back", process the item
       if (item.getAttribute('data-item-face') !== "back") {
-        // Get the 'y' attribute of the item and divide by 2
-        let y = parseInt(item.getAttribute('gs-y')) / 2;
+        // Read the geometry from gridstack's own node rather than from the attributes.
+        // Gridstack omits gs-h and gs-y when they equal its defaults, so a 0.5U device --
+        // one row tall -- has no gs-h at all, and parsing the missing attribute produced
+        // NaN.
+        const node = item.gridstackNode;
 
-        // Get the 'height' attribute of the item and divide by 2
-        let u_height = parseInt(item.getAttribute('gs-h')) / 2;
+        // Two rows to the rack unit, so these can be fractional.
+        let y = node.y / 2;
+        let u_height = node.h / 2;
 
         // Get the 'max-row' attribute of the grid and divide by 2
         let rack_height = item.gridstackNode.grid.el.getAttribute('gs-max-row') / 2;
@@ -168,7 +172,11 @@ function saveRack(rack_id, desc_units) {
         if (desc_units) {
           u_position = y + 1;
         } else {
-          u_position = u_height > 1 ? rack_height - y - u_height + 1 : rack_height - y;
+          // A device is mounted at its lowest unit, but rows are counted from the top of
+          // the rack, so the device's own height comes off. This holds for fractional
+          // heights too: the special case this replaces applied whenever the height was not
+          // above 1U, and so moved every 0.5U device down half a unit on each save.
+          u_position = rack_height - y - u_height + 1;
         }
 
         if (item.getAttribute('data-item-face') == "none") {
@@ -178,7 +186,7 @@ function saveRack(rack_id, desc_units) {
         // Push the item data to the 'gridData' array
         gridData.push({
           'id': parseInt(item.getAttribute('gs-id')),
-          'x': parseInt(item.getAttribute('gs-x')),
+          'x': node.x,
           'y': u_position,
           'is_full_depth': item.getAttribute('data-full-depth'),
           'face': item.getAttribute('data-item-face'),
