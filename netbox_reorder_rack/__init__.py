@@ -7,6 +7,6 @@ class NetboxReorderRackConfig(PluginConfig):
     description = "NetBox plugin to reorder rack layouts."
     version = "1.1.5"
     base_url = "reorder"
-
+    min_version = 4.7.0
 
 config = NetboxReorderRackConfig
