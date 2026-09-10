@@ -44,13 +44,6 @@ body:
       required: true
   - type: textarea
     attributes:
-      label: Database changes
-      description: >
-        Note any changes to the database schema necessary to support the new feature. This
-        plugin currently has no models or migrations of its own, so most proposals should
-        answer "none"; flag it here if yours is the exception.
-  - type: textarea
-    attributes:
       label: External dependencies
       description: >
         List any new dependencies on external libraries or services that this new feature would
