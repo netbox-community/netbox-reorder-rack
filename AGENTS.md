@@ -168,6 +168,7 @@ There are no version pins to bump. Instead: add a row to `COMPATIBILITY.md`, run
 ## Conventions and Patterns
 
 - **Branches.** `feature` is active development and the base for pull requests. `main` is released code and what releases are cut from.
+- **Writing style.** PR descriptions and all `docs/` content follow [ASD-STE100](https://www.asd-ste100.org/) (Simplified Technical English): short sentences (~20 words max), one instruction per sentence, active voice, present tense, plain approved vocabulary, and no long noun clusters or jargon.
 - **Changelog.** User-visible changes go in the root `CHANGELOG.md`. Do not edit `docs/changelog.md` — it is a one-line `pymdownx.snippets` include (`--8<-- "CHANGELOG.md"`) so there is a single source of truth. Keep GitHub-flavoured Markdown there rather than mkdocs admonitions, since it is read on GitHub too.
 - **Never hand-edit `static/`.** It is build output.
 - **Never add `package-lock.json`.**

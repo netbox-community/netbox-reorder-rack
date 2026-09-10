@@ -7,11 +7,11 @@
 | 1.1.3   | 4.0.0                  | 4.2.x                  |
 | 1.0.0   | —                      | 4.0.0                  |
 
-This plugin does not declare `min_version` or `max_version` in its `PluginConfig`, so NetBox
-will not refuse to load it on an unlisted version. The matrix records the ranges each release
-was built and tested against; running outside them is untested rather than blocked.
+This plugin does not set `min_version` or `max_version` in its `PluginConfig`. NetBox does not
+block the plugin on an unlisted version. The table shows the NetBox versions used to build and
+test each release. A version outside this range is untested, not blocked.
 
-The minimum for 1.1.5 is a hard one, unlike the earlier entries. The reorder page is built from
-NetBox's declarative UI components and imports `netbox.ui.breadcrumbs`, which arrived in 4.7, so
-on an earlier release the plugin fails to import rather than merely behaving oddly. Stay on
-1.1.4 for NetBox 4.3 to 4.6.
+Release 1.1.5 has a hard minimum version. Earlier releases do not. The reorder page uses
+NetBox's declarative UI components. It imports `netbox.ui.breadcrumbs`. NetBox 4.7 first adds
+this module. On an earlier NetBox release, the plugin fails to import. Use release 1.1.4 with
+NetBox 4.3 through 4.6.
