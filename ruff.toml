@@ -1,0 +1,13 @@
+# Ruff configuration for this plugin.
+#
+# These are ruff's own defaults, stated explicitly for a reason: without a config file here,
+# ruff walks up the directory tree until it finds one. When this repository is checked out
+# inside a netbox-docker tree — which is how it is deployed for development — it would pick
+# up netbox-docker's ruff.toml, which uses single quotes and enables isort. That reformats
+# every file away from the style used here, and its import sorting contradicts the
+# reorder-python-imports hook in .pre-commit-config.yaml, so the two hooks undo each other
+# on every run.
+line-length = 88
+
+[format]
+quote-style = "double"
