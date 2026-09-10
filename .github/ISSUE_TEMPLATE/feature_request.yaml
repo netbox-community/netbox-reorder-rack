@@ -22,6 +22,7 @@ body:
         - Data model extension
         - New functionality
         - Change to existing functionality
+        - Other
     validations:
       required: true
   - type: textarea
