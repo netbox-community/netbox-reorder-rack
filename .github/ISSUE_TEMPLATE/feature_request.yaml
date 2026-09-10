@@ -22,6 +22,7 @@ body:
         - Data model extension
         - New functionality
         - Change to existing functionality
+        - Other
     validations:
       required: true
   - type: textarea
@@ -41,6 +42,13 @@ body:
         Explain how adding this functionality would benefit netbox-reorder-rack users. What need does it address?
     validations:
       required: true
+  - type: textarea
+    attributes:
+      label: Database changes
+      description: >
+        Note any changes to the database schema necessary to support the new feature. This
+        plugin currently has no models or migrations of its own, so most proposals should
+        answer "none"; flag it here if yours is the exception.
   - type: textarea
     attributes:
       label: External dependencies
