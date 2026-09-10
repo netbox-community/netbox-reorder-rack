@@ -11,7 +11,7 @@ Because it stores nothing of its own, all of its behaviour is *read NetBox state
 ## Tech Stack
 
 - Python — no version declared in `setup.py`; NetBox's own floor applies
-- NetBox (host app) — **no `min_version` / `max_version` declared**, so NetBox will not gate loading. `COMPATIBILITY.md` records the tested ranges
+- NetBox (host app) — **`min_version` is set to `"4.7.0"`; no `max_version`.** NetBox refuses to load the plugin below 4.7. `COMPATIBILITY.md` records the full tested ranges, including earlier releases that supported older NetBox versions
 - Django + Django REST Framework (provided by NetBox)
 - [Gridstack](https://gridstackjs.com/) **12.6.0** and [Bootstrap](https://getbootstrap.com/) **5.3.8** — bundled, pinned to the versions NetBox ships
 - esbuild **0.28.2** — bundler, a devDependency. **yarn only**; see Front-end below
@@ -25,7 +25,7 @@ The plugin declares **no** `install_requires`. All front-end versions are pinned
 ```text
 .
 ├── netbox_reorder_rack/
-│   ├── __init__.py              — PluginConfig. No default_settings, no version pins.
+│   ├── __init__.py              — PluginConfig. No default_settings; sets min_version = "4.7.0".
 │   ├── template_content.py      — ReorderButton (PluginTemplateExtension) on dcim.rack.
 │   ├── views.py                 — ReorderView: registered on Rack via register_model_view,
 │   │                              renders the elevation from rack.get_rack_units().
@@ -163,7 +163,7 @@ Match the versions in NetBox's `netbox/project-static/package.json`, pin them ex
 
 ### Support a new NetBox version
 
-There are no version pins to bump. Instead: add a row to `COMPATIBILITY.md`, run the test suite against the new version, and check the internals in the Architecture section above still exist — this plugin reaches further into NetBox than most, including `dcim.svg.racks.get_device_name`, `utilities.html.foreground_color`, `netbox.config.get_config`, and `Rack.get_rack_units()`.
+Add a row to `COMPATIBILITY.md`, run the test suite against the new version, and check the internals in the Architecture section above still exist — this plugin reaches further into NetBox than most, including `dcim.svg.racks.get_device_name`, `utilities.html.foreground_color`, `netbox.config.get_config`, and `Rack.get_rack_units()`. Raise `min_version` in `__init__.py` only when the new release drops support for an older NetBox version; leave it alone for a compatible new NetBox release.
 
 ## Conventions and Patterns
 
