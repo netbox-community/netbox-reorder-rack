@@ -1,5 +1,16 @@
 # Change Log
 
+## Unreleased
+
+### Bug Fixes
+
+* **The save API now rejects insufficient permissions with HTTP 403 instead of an
+  unhandled exception.** Device view and change permissions are checked inside the
+  Django REST Framework permission lifecycle, retaining NetBox's default API checks
+  and per-device change restrictions. Rejected requests leave device positions
+  unchanged. Verified against NetBox 4.7.3 with all 13 plugin tests and real HTTP
+  requests covering anonymous, unauthorized, and authorized saves.
+
 ## 1.1.5
 
 **Verified against NetBox 4.7.** The plugin's own test suite was run against both NetBox 4.7

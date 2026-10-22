@@ -229,6 +229,9 @@ class ReorderRackAPITest(TestCase):
         device2 = Device.objects.get(name="Device 2")
         device3 = Device.objects.get(name="Device 3")
         device4 = Device.objects.get(name="Device 4")
+        original_positions = list(
+            rack.devices.order_by("pk").values_list("pk", "position", "face")
+        )
 
         data = {
             "front": [
@@ -279,7 +282,80 @@ class ReorderRackAPITest(TestCase):
             data,
             content_type="application/json",
         )
-        self.assertHttpStatus(resp, 500)
+        self.assertHttpStatus(resp, 403)
+        self.assertIn("detail", resp.json())
+        self.assertEqual(
+            list(rack.devices.order_by("pk").values_list("pk", "position", "face")),
+            original_positions,
+        )
+
+    def test_reorder_rack_view_with_only_view_permission(self):
+        self.add_permissions("dcim.view_device")
+        rack = Rack.objects.get(name="Test Rack 1")
+        device = Device.objects.get(name="Device 1")
+
+        response = self.put_layout(rack, [(device, 10)])
+
+        self.assertHttpStatus(response, 403)
+        device.refresh_from_db()
+        self.assertEqual(device.position, 1)
+        self.assertEqual(device.face, "front")
+
+    def test_reorder_rack_view_with_only_change_permission(self):
+        self.add_permissions("dcim.change_device")
+        rack = Rack.objects.get(name="Test Rack 1")
+        device = Device.objects.get(name="Device 1")
+
+        response = self.put_layout(rack, [(device, 10)])
+
+        self.assertHttpStatus(response, 403)
+        device.refresh_from_db()
+        self.assertEqual(device.position, 1)
+        self.assertEqual(device.face, "front")
+
+    def test_reorder_rack_view_anonymous(self):
+        self.client.logout()
+        rack = Rack.objects.get(name="Test Rack 1")
+        device = Device.objects.get(name="Device 1")
+
+        response = self.put_layout(rack, [(device, 10)])
+
+        self.assertHttpStatus(response, 403)
+        device.refresh_from_db()
+        self.assertEqual(device.position, 1)
+        self.assertEqual(device.face, "front")
+
+    def test_reorder_rack_view_with_restricted_change_permission(self):
+        self.add_permissions("dcim.view_device")
+        rack = Rack.objects.get(name="Test Rack 1")
+        allowed = Device.objects.get(name="Device 1")
+        denied = Device.objects.get(name="Device 2")
+        obj_perm = ObjectPermission.objects.create(
+            name="Change one device",
+            actions=["change"],
+            constraints={"pk": allowed.pk},
+        )
+        obj_perm.users.add(self.user)
+        obj_perm.object_types.add(ObjectType.objects.get_for_model(Device))
+        original_positions = list(
+            rack.devices.order_by("pk").values_list("pk", "position", "face")
+        )
+
+        response = self.put_layout(rack, [(allowed, 10), (denied, 20)])
+
+        self.assertHttpStatus(response, 403)
+        self.assertEqual(
+            list(rack.devices.order_by("pk").values_list("pk", "position", "face")),
+            original_positions,
+        )
+
+        response = self.put_layout(rack, [(allowed, 10)])
+
+        self.assertHttpStatus(response, 201)
+        allowed.refresh_from_db()
+        denied.refresh_from_db()
+        self.assertEqual(allowed.position, 10)
+        self.assertEqual(denied.position, 2)
 
     def test_reorder_rack_view_with_permissions(self):
         # Add model-level permission
