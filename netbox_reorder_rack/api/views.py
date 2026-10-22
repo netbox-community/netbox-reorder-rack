@@ -3,7 +3,6 @@ from collections import namedtuple
 
 from dcim.models import Device
 from dcim.models import Rack
-from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
@@ -37,11 +36,16 @@ class ReorderRackSerializer(serializers.Serializer):
     other = serializers.ListField(child=serializers.JSONField())
 
 
-class SaveViewSet(PermissionRequiredMixin, viewsets.ViewSet):
+class SaveViewSet(viewsets.ViewSet):
     permission_required = ["dcim.change_device", "dcim.view_device"]
     serializer_class = ReorderRackSerializer
     queryset = Device.objects.none()
     schema = None
+
+    def check_permissions(self, request):
+        super().check_permissions(request)
+        if not request.user.has_perms(self.permission_required):
+            self.permission_denied(request)
 
     def update(self, request, pk):
         rack = get_object_or_404(Rack, pk=pk)
